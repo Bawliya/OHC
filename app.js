@@ -8,7 +8,11 @@ dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
-app.use('/auth', authRoutes);
+app.use('/api', authRoutes);
+
+app.get('/test', (req, res) => {
+  res.send("Welcome OHC");
+});
 
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
