@@ -74,6 +74,7 @@ exports.login = async (req, res) => {
       message: 'Login successful',
       status: true,
       token,
+      data:user
     });
   } catch (error) {
     console.error('Error during login:', error);
@@ -130,6 +131,7 @@ exports.verifyOtp = async (req, res) => {
       message: 'OTP verified successfully',
       status: true,
       token,
+      data:user
     });
   } catch (error) {
     console.error('Error verifying OTP:', error);
