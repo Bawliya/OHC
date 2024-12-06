@@ -13,6 +13,14 @@ const userSchema = new mongoose.Schema({
   city: { type: String },
   state: { type: String },
   zipCode: { type: String },
+
+  business_name:{type:String},
+  whatsapp_number:{type:String},
+  about_desc:{type:String},
+
+  image:{type:String},
+  
+
   userType: { type: String, enum: ['User', 'Pharmacy Clinic', 'Lab Test Doctor'], required: true },
 },
 {

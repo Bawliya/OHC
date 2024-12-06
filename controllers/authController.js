@@ -2,7 +2,37 @@ const User = require('../models/userModel');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
 const { use } = require('../routes/authRoutes');
+const labtest = require('../models/labtest');
+
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/images'); // Directory to store images
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/;
+    const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimeType = fileTypes.test(file.mimetype);
+
+    if (extName && mimeType) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only .jpeg, .jpg, and .png file types are allowed!'));
+    }
+  },
+}).single('image'); // 'profileImage' should match the key in the request form-data
+
 
 const sendOTP = async (email) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -47,11 +77,11 @@ exports.login = async (req, res) => {
       });
     }
 
-    if(user.verify == false){
+    if (user.verify == false) {
       return res.status(400).json({
-        message: 'Please verify your email register again' ,
+        message: 'Please verify your email register again',
         status: false
-        })
+      })
     }
 
     // Verify the password using bcrypt
@@ -74,7 +104,7 @@ exports.login = async (req, res) => {
       message: 'Login successful',
       status: true,
       token,
-      data:user
+      data: user
     });
   } catch (error) {
     console.error('Error during login:', error);
@@ -131,7 +161,7 @@ exports.verifyOtp = async (req, res) => {
       message: 'OTP verified successfully',
       status: true,
       token,
-      data:user
+      data: user
     });
   } catch (error) {
     console.error('Error verifying OTP:', error);
@@ -226,5 +256,220 @@ exports.register = async (req, res) => {
       .status(500)
       .json({ message: 'Error registering user', status: false });
   }
+};
+
+exports.register_lab = async (req, res) => {
+  const {
+    business_name,
+    email,
+    fullName,
+    phoneNumber,
+    whatsapp_number,
+    address,
+    city,
+    state,
+    zipCode,
+    password,
+    userType,
+    about_desc,
+    tests
+  } = req.body;
+
+  try {
+    // Check if a user already exists with the given email
+    const existingUser = await User.findOne({ email });
+    const otp = 1234; // Generate OTP (Consider generating dynamically in production)
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    if (existingUser) {
+      // If the user exists and is already verified
+      if (existingUser.verify) {
+        return res
+          .status(400)
+          .json({ message: 'Email already exists', status: false });
+      }
+      // If the user exists but is not verified, update their details and resend OTP
+      await User.findOneAndUpdate(
+        { email },
+        {
+          $set: {
+            business_name,
+            fullName,
+            phoneNumber,
+            whatsapp_number,
+            address,
+            city,
+            state,
+            zipCode,
+            userType,
+            about_desc,
+            password: hashedPassword
+          },
+        },
+        { new: true } // Ensure the updated document is returned
+      );
+
+      await labtest.deleteMany({ lab_id: existingUser._id });
+
+      if (tests.length > 0) {
+        for (let i = 0; i < tests.length; i++) {
+          const test = tests[i];
+          var lab = new labtest({
+            lab_id: existingUser._id,
+            name: tests[i].name,
+            price: tests[i].price
+          });
+          await lab.save();
+
+        }
+
+      }
+
+
+      return res
+        .status(200)
+        .json({ message: 'OTP sent to your email', status: true });
+    }
+
+    // If the user does not exist, create a new user
+    // const hashedPassword = await bcrypt.hash(password, 12); // Hash the password for security
+    const newUser = new User({
+      business_name,
+      email,
+      fullName,
+      phoneNumber,
+      whatsapp_number,
+      address,
+      city,
+      state,
+      zipCode,
+      password: hashedPassword,
+      userType,
+      about_desc
+    });
+
+    var user = await newUser.save();
+    if (tests.length > 0) {
+      for (let i = 0; i < tests.length; i++) {
+        const test = tests[i];
+        var lab = new labtest({
+          lab_id: user._id,
+          name: tests[i].name,
+          price: tests[i].price
+        });
+        await lab.save();
+
+      }
+
+    }
+    return res
+      .status(200)
+      .json({ message: 'OTP sent to your email', status: true });
+  } catch (error) {
+    console.error('Error during registration:', error);
+    return res
+      .status(500)
+      .json({ message: 'Error registering user', status: false });
+  }
+};
+
+
+exports.register_pharmacy = async (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message, status: false });
+    }
+
+    const {
+      email,
+      fullName,
+      business_name,
+      phoneNumber,
+      whatsapp_number,
+      gender,
+      address,
+      city,
+      state,
+      zipCode,
+      password,
+      userType,
+      about_desc,
+    } = req.body;
+
+    const image = req.file ? req.file.path : null; // Get the uploaded image path
+
+    try {
+      const existingUser = await User.findOne({ email });
+      const otp = 1234;
+
+      if (existingUser) {
+        if (existingUser.verify) {
+          return res
+            .status(400)
+            .json({ message: 'Email already exists', status: false });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        await User.findOneAndUpdate(
+          { email },
+          {
+            $set: {
+              fullName,
+              otp,
+              business_name,
+              about_desc,
+              phoneNumber,
+              whatsapp_number,
+              gender,
+              address,
+              city,
+              state,
+              zipCode,
+              userType,
+              password: hashedPassword,
+              image,
+            },
+          },
+          { new: true }
+        );
+
+        return res
+          .status(200)
+          .json({ message: 'OTP sent to your email', status: true });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      const newUser = new User({
+        email,
+        fullName,
+        otp,
+        business_name,
+        about_desc,
+        phoneNumber,
+        whatsapp_number,
+        gender,
+        address,
+        city,
+        state,
+        zipCode,
+        userType,
+        password: hashedPassword,
+        image,
+      });
+
+      await newUser.save();
+
+      return res
+        .status(200)
+        .json({ message: 'OTP sent to your email', status: true });
+    } catch (error) {
+      console.error('Error during registration:', error);
+      return res
+        .status(500)
+        .json({ message: 'Error registering user', status: false });
+    }
+  });
 };
 
