@@ -9,6 +9,7 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 app.use('/api', authRoutes);
+app.use('/uploads', express.static('uploads'));
 
 app.get('/test', (req, res) => {
   res.send("Welcome OHC");
