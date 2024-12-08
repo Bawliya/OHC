@@ -1,5 +1,6 @@
 const Banner = require('../models/banner'); // Assuming you have a Banner model
 const Category = require('../models/category'); // Assuming you have a Category model
+const Video = require('../models/video');
 
 // Fetch homepage data
 exports.getHomePageData = async (req, res) => {
@@ -9,6 +10,7 @@ exports.getHomePageData = async (req, res) => {
 
     // Fetch all categories
     const categories = await Category.find();
+    const video = await Video.find();
 
     // Return the data
     res.status(200).json({
@@ -17,6 +19,7 @@ exports.getHomePageData = async (req, res) => {
       data: {
         banners,
         categories,
+        video
       },
     });
   } catch (err) {
