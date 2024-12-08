@@ -4,10 +4,17 @@ const { login, verifyOtp, register,register_lab,register_pharmacy } = require('.
 const router = express.Router();
 const multer = require('multer');
 const auth = require('../common/authMiddleware');
+const uploadvideo = require("../common/multer");
 const bannerController = require('../controllers/bannercontroller');
 const categoryController = require('../controllers/caategorycontroller');
 const homeController = require('../controllers/homeController');
 const adminController = require('../controllers/admincontroller');
+const {
+  createVideo,
+  getAllVideos,
+  getVideoById,
+  deleteVideo,
+} = require("../controllers/videocontroller");
 
 
 // Set up Multer for file uploads
@@ -48,6 +55,11 @@ router.get('/categoryget/', categoryController.getAllCategories);
 router.get('/categorygetone/:id', categoryController.getCategoryById);
 router.put('/categoryupdate/:id', upload.single('image'), categoryController.updateCategory);
 router.delete('/categoryupdate/:id', categoryController.deleteCategory);
+
+router.post("/videoadd", uploadvideo.single("video"), createVideo);
+router.get("/videoget", getAllVideos);
+router.get("/videoupdate/:id", getVideoById);
+router.delete("/videodelete/:id", deleteVideo);
 
 
 module.exports = router; 
