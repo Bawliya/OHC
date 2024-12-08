@@ -32,6 +32,8 @@ router.post('/register_pharmacy', register_pharmacy);
 
 // Home Page API
 router.get('/home',auth, homeController.getHomePageData);
+router.get('/getLabs',auth, homeController.getLabs);
+router.get('/getPharmacy',auth, homeController.getPharmacy);
 
 
  
