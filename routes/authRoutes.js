@@ -3,9 +3,11 @@ const { login, verifyOtp, register,register_lab,register_pharmacy } = require('.
 
 const router = express.Router();
 const multer = require('multer');
+const auth = require('../common/authMiddleware');
 const bannerController = require('../controllers/bannercontroller');
 const categoryController = require('../controllers/caategorycontroller');
 const homeController = require('../controllers/homeController');
+const adminController = require('../controllers/admincontroller');
 
 
 // Set up Multer for file uploads
@@ -22,12 +24,18 @@ router.post('/register_lab', register_lab);
 router.post('/register_pharmacy', register_pharmacy);
 
 // Home Page API
-router.get('/home', homeController.getHomePageData);
+router.get('/home',auth, homeController.getHomePageData);
 
 
-
+ 
 
 //   admin apis ===================================================>
+
+  // Admin registration route
+router.post('/admin/register', adminController.registerAdmin);
+
+// Admin login route
+router.post('/admin/login', adminController.loginAdmin);
 
 router.post('/banneradd', upload.single('image'), bannerController.createBanner);
 router.get('/bannerget', bannerController.getAllBanners);
