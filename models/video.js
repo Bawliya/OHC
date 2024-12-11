@@ -7,6 +7,11 @@ const VideoSchema = new mongoose.Schema(
       enum: ["youtube", "video"], // Allowed values
       required: true,
     },
+    video_type: {
+      type: String,
+      enum: ["yoga", "service","testmonial"], // Allowed values
+      required: true,
+    },
     title: {
       type: String,
       required: true,

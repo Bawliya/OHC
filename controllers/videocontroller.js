@@ -4,7 +4,7 @@ const path = require("path");
 // Create a new video
 exports.createVideo = async (req, res) => {
   try {
-    const { type, title, description, youTubeUrl } = req.body;
+    const { type, title, description, youTubeUrl,video_type } = req.body;
 
     // Validate YouTube URL if type is "youtube"
     if (type === "youtube" && !youTubeUrl) {
@@ -21,6 +21,7 @@ exports.createVideo = async (req, res) => {
       type,
       title,
       description,
+      video_type,
       youTubeUrl: type === "youtube" ? youTubeUrl : null,
       videoPath: type === "video" ? req.file.filename : null,
     };
