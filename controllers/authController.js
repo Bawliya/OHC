@@ -320,19 +320,23 @@ exports.register_lab = async (req, res) => {
 
         await labtest.deleteMany({ lab_id: existingUser._id });
 
-        if (tests.length > 0) {
-          for (let i = 0; i < tests.length; i++) {
-            const test = tests[i];
-            var lab = new labtest({
-              lab_id: existingUser._id,
-              name: tests[i].name,
-              price: tests[i].price
-            });
-            await lab.save();
-
-          }
-
-        }
+        if(tests != ""){
+          tests_list = JSON.parse(tests);
+          if (tests_list.length > 0) {
+           for (let i = 0; i < tests_list.length; i++) {
+             const test = tests_list[i];
+             var lab = new labtest({
+               lab_id: existingUser._id,
+               name: tests_list[i].name,
+               price: tests_list[i].price
+             });
+             await lab.save();
+  
+           }
+  
+         }
+       }
+        
 
 
         return res
@@ -359,19 +363,22 @@ exports.register_lab = async (req, res) => {
       });
 
       var user = await newUser.save();
-      if (tests.length > 0) {
-        for (let i = 0; i < tests.length; i++) {
-          const test = tests[i];
-          var lab = new labtest({
-            lab_id: user._id,
-            name: tests[i].name,
-            price: tests[i].price
-          });
-          await lab.save();
+      if(tests != ""){
+        tests_list = JSON.parse(tests);
+        if (tests_list.length > 0) {
+         for (let i = 0; i < tests_list.length; i++) {
+           const test = tests_list[i];
+           var lab = new labtest({
+             lab_id: existingUser._id,
+             name: tests_list[i].name,
+             price: tests_list[i].price
+           });
+           await lab.save();
 
-        }
+         }
 
-      }
+       }
+     }
       return res
         .status(200)
         .json({ message: 'OTP sent to your email', status: true });
