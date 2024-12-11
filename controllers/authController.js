@@ -417,7 +417,7 @@ exports.register_pharmacy = async (req, res) => {
       about_desc,
     } = req.body;
     var otp = 1234;
-    const image = req.file ? req.file.path : null; // Get the uploaded image path
+    const image = req.file ? req.file.filename : null; // Get the uploaded image path
 
     try {
       const existingUser = await User.findOne({ email });
