@@ -4,16 +4,25 @@ const path = require("path");
 // Create a new video
 exports.createVideo = async (req, res) => {
   try {
-    const { type, title, description, youTubeUrl,video_type } = req.body;
+    const { type, title, description, youTubeUrl, video_type } = req.body;
 
     // Validate YouTube URL if type is "youtube"
     if (type === "youtube" && !youTubeUrl) {
-      return res.status(400).json({ message: "YouTube URL is required for type 'youtube'" , status:false });
+      return res
+        .status(400)
+        .json({ message: "YouTube URL is required for type 'youtube'", status: false });
     }
 
-    // Validate uploaded file if type is "video"
-    if (type === "video" && !req.file) {
-      return res.status(400).json({ message: "Video file is required for type 'video'",status:false });
+    // Validate uploaded files if type is "video"
+    if (type === "video" && (!req.files || !req.files.video)) {
+      return res
+        .status(400)
+        .json({ message: "Video file is required for type 'video'", status: false });
+    }
+
+    // Validate uploaded image
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ message: "Image file is required", status: false });
     }
 
     // Create video document
@@ -23,15 +32,18 @@ exports.createVideo = async (req, res) => {
       description,
       video_type,
       youTubeUrl: type === "youtube" ? youTubeUrl : null,
-      videoPath: type === "video" ? req.file.filename : null,
+      videoPath: type === "video" ? req.files.video[0].filename : null,
+      imagePath: req.files.image[0].filename, // Save the uploaded image file
     };
 
     const video = new Video(videoData);
     await video.save();
 
-    res.status(201).json({ status:true,message: "Video created successfully", video });
+    res
+      .status(201)
+      .json({ status: true, message: "Video created successfully", video });
   } catch (error) {
-    res.status(500).json({ message: "Error creating video", error ,status:false});
+    res.status(500).json({ message: "Error creating video", error, status: false });
   }
 };
 

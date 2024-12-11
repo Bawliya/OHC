@@ -58,7 +58,10 @@ router.get('/categorygetone/:id', categoryController.getCategoryById);
 router.put('/categoryupdate/:id', upload.single('image'), categoryController.updateCategory);
 router.delete('/categoryupdate/:id', categoryController.deleteCategory);
 
-router.post("/videoadd", uploadvideo.single("video"), createVideo);
+router.post("/videoadd", upload.fields([
+  { name: "video", maxCount: 1 },
+  { name: "image", maxCount: 1 },
+]), createVideo);
 router.get("/videoget", getAllVideos);
 router.get("/videoupdate/:id", getVideoById);
 router.delete("/videodelete/:id", deleteVideo);
