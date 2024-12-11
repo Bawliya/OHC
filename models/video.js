@@ -26,6 +26,9 @@ const VideoSchema = new mongoose.Schema(
         return this.type === "youtube"; // Required only for YouTube type
       },
     },
+    image:{
+      type: String,
+    },
     videoPath: {
       type: String,
       required: function () {
