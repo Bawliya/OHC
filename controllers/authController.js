@@ -100,7 +100,7 @@ exports.login = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Login successful',
       status: true,
       token,
@@ -259,81 +259,13 @@ exports.register = async (req, res) => {
 };
 
 exports.register_lab = async (req, res) => {
-  const {
-    business_name,
-    email,
-    fullName,
-    phoneNumber,
-    whatsapp_number,
-    address,
-    city,
-    state,
-    zipCode,
-    password,
-    userType,
-    about_desc,
-    tests
-  } = req.body;
 
-  try {
-    // Check if a user already exists with the given email
-    const existingUser = await User.findOne({ email });
-    const otp = 1234; // Generate OTP (Consider generating dynamically in production)
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    if (existingUser) {
-      // If the user exists and is already verified
-      if (existingUser.verify) {
-        return res
-          .status(400)
-          .json({ message: 'Email already exists', status: false });
-      }
-      // If the user exists but is not verified, update their details and resend OTP
-      await User.findOneAndUpdate(
-        { email },
-        {
-          $set: {
-            business_name,
-            fullName,
-            phoneNumber,
-            whatsapp_number,
-            address,
-            city,
-            state,
-            zipCode,
-            userType,
-            about_desc,
-            password: hashedPassword
-          },
-        },
-        { new: true } // Ensure the updated document is returned
-      );
-
-      await labtest.deleteMany({ lab_id: existingUser._id });
-
-      if (tests.length > 0) {
-        for (let i = 0; i < tests.length; i++) {
-          const test = tests[i];
-          var lab = new labtest({
-            lab_id: existingUser._id,
-            name: tests[i].name,
-            price: tests[i].price
-          });
-          await lab.save();
-
-        }
-
-      }
-
-
-      return res
-        .status(200)
-        .json({ message: 'OTP sent to your email', status: true });
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message, status: false });
     }
 
-    // If the user does not exist, create a new user
-    // const hashedPassword = await bcrypt.hash(password, 12); // Hash the password for security
-    const newUser = new User({
+    const {
       business_name,
       email,
       fullName,
@@ -343,34 +275,113 @@ exports.register_lab = async (req, res) => {
       city,
       state,
       zipCode,
-      password: hashedPassword,
+      password,
       userType,
-      about_desc
-    });
+      about_desc,
+      tests
+    } = req.body;
 
-    var user = await newUser.save();
-    if (tests.length > 0) {
-      for (let i = 0; i < tests.length; i++) {
-        const test = tests[i];
-        var lab = new labtest({
-          lab_id: user._id,
-          name: tests[i].name,
-          price: tests[i].price
-        });
-        await lab.save();
+    const image = req.file ? req.file.filename : null;
 
+    try {
+      // Check if a user already exists with the given email
+      const existingUser = await User.findOne({ email });
+      const otp = 1234; // Generate OTP (Consider generating dynamically in production)
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      if (existingUser) {
+        // If the user exists and is already verified
+        if (existingUser.verify) {
+          return res
+            .status(400)
+            .json({ message: 'Email already exists', status: false });
+        }
+        // If the user exists but is not verified, update their details and resend OTP
+        await User.findOneAndUpdate(
+          { email },
+          {
+            $set: {
+              business_name,
+              fullName,
+              phoneNumber,
+              whatsapp_number,
+              address,
+              city,
+              state,
+              zipCode,
+              userType,
+              about_desc,
+              password: hashedPassword,
+              image
+            },
+          },
+          { new: true } // Ensure the updated document is returned
+        );
+
+        await labtest.deleteMany({ lab_id: existingUser._id });
+
+        if (tests.length > 0) {
+          for (let i = 0; i < tests.length; i++) {
+            const test = tests[i];
+            var lab = new labtest({
+              lab_id: existingUser._id,
+              name: tests[i].name,
+              price: tests[i].price
+            });
+            await lab.save();
+
+          }
+
+        }
+
+
+        return res
+          .status(200)
+          .json({ message: 'OTP sent to your email', status: true });
       }
 
+      // If the user does not exist, create a new user
+      // const hashedPassword = await bcrypt.hash(password, 12); // Hash the password for security
+      const newUser = new User({
+        business_name,
+        email,
+        fullName,
+        phoneNumber,
+        whatsapp_number,
+        address,
+        city,
+        state,
+        zipCode,
+        password: hashedPassword,
+        userType,
+        about_desc,
+        image
+      });
+
+      var user = await newUser.save();
+      if (tests.length > 0) {
+        for (let i = 0; i < tests.length; i++) {
+          const test = tests[i];
+          var lab = new labtest({
+            lab_id: user._id,
+            name: tests[i].name,
+            price: tests[i].price
+          });
+          await lab.save();
+
+        }
+
+      }
+      return res
+        .status(200)
+        .json({ message: 'OTP sent to your email', status: true });
+    } catch (error) {
+      console.error('Error during registration:', error);
+      return res
+        .status(500)
+        .json({ message: 'Error registering user', status: false });
     }
-    return res
-      .status(200)
-      .json({ message: 'OTP sent to your email', status: true });
-  } catch (error) {
-    console.error('Error during registration:', error);
-    return res
-      .status(500)
-      .json({ message: 'Error registering user', status: false });
-  }
+  });
 };
 
 
