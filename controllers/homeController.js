@@ -12,7 +12,8 @@ exports.getHomePageData = async (req, res) => {
 
     // Fetch all categories
     const categories = await Category.find();
-    const video = await Video.find();
+    const service = await Video.find({video_type:"service"});
+    const testmonial = await Video.find({video_type:"testmonial"});
 
     // Return the data
     res.status(200).json({
@@ -21,7 +22,8 @@ exports.getHomePageData = async (req, res) => {
       data: {
         banners,
         categories,
-        video
+        service,
+        testmonial
       },
     });
   } catch (err) {
