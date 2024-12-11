@@ -280,6 +280,7 @@ exports.register_lab = async (req, res) => {
       about_desc,
       tests
     } = req.body;
+    var otp = 1234;
 
     const image = req.file ? req.file.filename : null;
 
@@ -312,7 +313,8 @@ exports.register_lab = async (req, res) => {
               userType,
               about_desc,
               password: hashedPassword,
-              image
+              image,
+              otp
             },
           },
           { new: true } // Ensure the updated document is returned
@@ -359,7 +361,8 @@ exports.register_lab = async (req, res) => {
         password: hashedPassword,
         userType,
         about_desc,
-        image
+        image,
+        otp
       });
 
       var user = await newUser.save();
@@ -413,7 +416,7 @@ exports.register_pharmacy = async (req, res) => {
       userType,
       about_desc,
     } = req.body;
-
+    var otp = 1234;
     const image = req.file ? req.file.path : null; // Get the uploaded image path
 
     try {
@@ -447,6 +450,7 @@ exports.register_pharmacy = async (req, res) => {
               userType,
               password: hashedPassword,
               image,
+              otp
             },
           },
           { new: true }
@@ -475,6 +479,7 @@ exports.register_pharmacy = async (req, res) => {
         userType,
         password: hashedPassword,
         image,
+        otp
       });
 
       await newUser.save();
