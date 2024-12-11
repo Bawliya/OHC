@@ -33,7 +33,7 @@ exports.createVideo = async (req, res) => {
       video_type,
       youTubeUrl: type === "youtube" ? youTubeUrl : null,
       videoPath: type === "video" ? req.files.video[0].filename : null,
-      imagePath: req.files.image[0].filename, // Save the uploaded image file
+      image: req.files.image[0].filename, // Save the uploaded image file
     };
 
     const video = new Video(videoData);
