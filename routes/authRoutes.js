@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, verifyOtp,otpSend, register,register_lab,register_pharmacy,updatePassword } = require('../controllers/authController');
+const { login, verifyOtp,otpSend,updatePasswordWithOldPassword, register,register_lab,register_pharmacy,updatePassword } = require('../controllers/authController');
 
 const router = express.Router();
 const multer = require('multer');
@@ -32,11 +32,13 @@ router.post('/register_lab', register_lab);
 router.post('/register_pharmacy', register_pharmacy);
 
 router.post('/updatePassword',auth, updatePassword);
+router.post('/updatePasswordWithOldPassword',auth, updatePasswordWithOldPassword);
 
 // Home Page API
 router.get('/home',auth, homeController.getHomePageData);
 router.get('/getLabs',auth, homeController.getLabs);
 router.get('/getPharmacy',auth, homeController.getPharmacy);
+router.post('/searchByCityAndType',auth, homeController.searchByCityAndType);
 
 
  

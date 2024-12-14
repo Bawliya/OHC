@@ -98,7 +98,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { email: user.email, userId: user._id },
       jwtsecret,
-      { expiresIn: '1d' }
+      { expiresIn: '1y' }
     );
 
     return res.status(200).json({
@@ -155,7 +155,7 @@ exports.verifyOtp = async (req, res) => {
     const token = jwt.sign(
       { email: user.email, userId: user._id },
       jwtsecret,
-      { expiresIn: '1h' }
+      { expiresIn: '1y' }
     );
 
     res.status(200).json({
@@ -172,6 +172,56 @@ exports.verifyOtp = async (req, res) => {
     });
   }
 };
+
+exports.updatePasswordWithOldPassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.userId; // Assuming userId is extracted from the JWT token in middleware
+
+    // Validate input
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        message: 'Old password and new password are required',
+        status: false,
+      });
+    }
+
+    // Find the user by their ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+        status: false,
+      });
+    }
+
+    // Compare old password with stored hashed password
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      return res.status(401).json({
+        message: 'Invalid old password',
+        status: false,
+      });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword; // Update the password in the database
+    await user.save(); // Save the updated user document
+
+    return res.status(200).json({
+      message: 'Password updated successfully',
+      status: true,
+    });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return res.status(500).json({
+      message: 'Error updating password',
+      status: false,
+    });
+  }
+};
+
 
 exports.updatePassword = async (req, res) => {
   try {
