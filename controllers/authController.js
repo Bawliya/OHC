@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const { use } = require('../routes/authRoutes');
 const labtest = require('../models/labtest');
+const jwtsecret = "ohcappapijwt";
 
 
 // Configure multer for image uploads
@@ -96,7 +97,7 @@ exports.login = async (req, res) => {
     // Generate a JWT token
     const token = jwt.sign(
       { email: user.email, userId: user._id },
-      process.env.JWT_SECRET,
+      jwtsecret,
       { expiresIn: '1d' }
     );
 
@@ -117,7 +118,7 @@ exports.login = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-
+  
   try {
     // Validate the input
     if (!email || !otp) {
@@ -128,7 +129,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     // Find the user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email:email.toLowerCase() });
 
     if (!user) {
       return res.status(404).json({
@@ -153,7 +154,7 @@ exports.verifyOtp = async (req, res) => {
     // Generate a JWT token
     const token = jwt.sign(
       { email: user.email, userId: user._id },
-      process.env.JWT_SECRET,
+      jwtsecret,
       { expiresIn: '1h' }
     );
 
@@ -171,6 +172,61 @@ exports.verifyOtp = async (req, res) => {
     });
   }
 };
+
+exports.updatePassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user_id = req.user.userId;
+
+    const user = await User.findOne({ _id: user_id });
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+        status: false,
+      });
+    }
+    // // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.save();
+    res.status(200).json({
+      message: 'Password updated successfully',
+      status: true,
+    });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({
+      message: 'Error updating password',
+      status: false,
+    });
+  }
+}
+
+exports.otpSend = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const otp = "1234";
+    const user = await User.findOne({ email:email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+        status: false,
+      });
+    }
+    user.otp = otp;
+    user.save();
+    return res
+      .status(200)
+      .json({ message: 'OTP sent to your email', status: true });
+
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({
+      message: 'Error updating password',
+      status: false,
+    });
+  }
+}
 
 
 
@@ -322,23 +378,23 @@ exports.register_lab = async (req, res) => {
 
         await labtest.deleteMany({ lab_id: existingUser._id });
 
-        if(tests != ""){
+        if (tests != "") {
           tests_list = JSON.parse(tests);
           if (tests_list.length > 0) {
-           for (let i = 0; i < tests_list.length; i++) {
-             const test = tests_list[i];
-             var lab = new labtest({
-               lab_id: existingUser._id,
-               name: tests_list[i].name,
-               price: tests_list[i].price
-             });
-             await lab.save();
-  
-           }
-  
-         }
-       }
-        
+            for (let i = 0; i < tests_list.length; i++) {
+              const test = tests_list[i];
+              var lab = new labtest({
+                lab_id: existingUser._id,
+                name: tests_list[i].name,
+                price: tests_list[i].price
+              });
+              await lab.save();
+
+            }
+
+          }
+        }
+
 
 
         return res
@@ -366,22 +422,22 @@ exports.register_lab = async (req, res) => {
       });
 
       var user = await newUser.save();
-      if(tests != ""){
+      if (tests != "") {
         tests_list = JSON.parse(tests);
         if (tests_list.length > 0) {
-         for (let i = 0; i < tests_list.length; i++) {
-           const test = tests_list[i];
-           var lab = new labtest({
-             lab_id: existingUser._id,
-             name: tests_list[i].name,
-             price: tests_list[i].price
-           });
-           await lab.save();
+          for (let i = 0; i < tests_list.length; i++) {
+            const test = tests_list[i];
+            var lab = new labtest({
+              lab_id: existingUser._id,
+              name: tests_list[i].name,
+              price: tests_list[i].price
+            });
+            await lab.save();
 
-         }
+          }
 
-       }
-     }
+        }
+      }
       return res
         .status(200)
         .json({ message: 'OTP sent to your email', status: true });

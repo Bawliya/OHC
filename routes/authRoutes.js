@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, verifyOtp, register,register_lab,register_pharmacy } = require('../controllers/authController');
+const { login, verifyOtp,otpSend, register,register_lab,register_pharmacy,updatePassword } = require('../controllers/authController');
 
 const router = express.Router();
 const multer = require('multer');
@@ -25,10 +25,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/login', login);
+router.post('/otpSend', otpSend);
 router.post('/verify-otp', verifyOtp);
 router.post('/register', register);
 router.post('/register_lab', register_lab);
 router.post('/register_pharmacy', register_pharmacy);
+
+router.post('/updatePassword',auth, updatePassword);
 
 // Home Page API
 router.get('/home',auth, homeController.getHomePageData);
