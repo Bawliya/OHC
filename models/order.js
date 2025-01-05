@@ -1,0 +1,63 @@
+const mongoose = require('mongoose');
+
+const orderSchema = new mongoose.Schema(
+  {
+    user_id: { 
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'users',
+      required: true,
+    },
+    type: { 
+      type: String, 
+      required: true, 
+      trim: true,
+    },
+    lab_id: { 
+      type: mongoose.Schema.Types.ObjectId, 
+    },
+    test_id: { 
+      type: mongoose.Schema.Types.ObjectId, 
+    },
+    fullname: { 
+      type: String, 
+      required: true, 
+    },
+    phone_number: { 
+      type: String, 
+      required: true, 
+    },
+    address: { 
+      type: String, 
+      required: true, 
+    },
+    city: { 
+      type: String, 
+      required: true, 
+    },
+    state: { 
+      type: String, 
+      required: true, 
+    },
+    zip_code: { 
+      type: String, 
+      required: true, 
+    },
+    date: { 
+      type: Date, 
+      required: true,
+    },
+    start_time: { 
+      type: String, 
+      required: true,
+    },
+    end_time: { 
+      type: String,  
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model('order', orderSchema);

@@ -1,4 +1,6 @@
 const Admin = require('../models/admin');
+const order = require('../models/order');
+const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 
 // Register Admin
@@ -72,6 +74,73 @@ exports.loginAdmin = async (req, res) => {
     res.status(500).json({
       status: false,
       message: 'Failed to log in admin',
+      error: err.message,
+    });
+  }
+};
+
+// get all user api by type  
+exports.getUsersByType = async (req, res) => {
+  try {
+    const { userType = User } = req.query;
+    console.log(userType)
+    const users = await User.find().sort({createdAt:-1});
+    res.status(200).json({
+      status: true,
+      message:"User get success",
+      data: users
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to get users',
+      error: err.message,
+    });
+  }
+};
+
+
+exports.getDashboardData = async (req, res) => {
+  try {
+    const users = await User.countDocuments({userType:"User"});
+    const pharmacy_clinic = await User.countDocuments({userType:"Pharmacy Clinic"});
+    const lab_test_doctor = await User.countDocuments({userType:"Lab Test Doctor"});
+    const order = await order.countDocuments();
+    const latest_user = await User.find().sort({createdAt:-1}).limit(10);
+
+    res.status(200).json({
+      status: true,
+      message:"User get success",
+      data: {
+        users,
+        pharmacy_clinic,
+        lab_test_doctor,
+        order,
+        latest_user
+      }
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to get users',
+      error: err.message,
+    });
+  }
+};
+
+exports.getOrders = async (req, res) => {
+  try {
+    const data = await order.find();
+
+    res.status(200).json({
+      status: true,
+      message:"Orders get success",
+      data
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to get users',
       error: err.message,
     });
   }

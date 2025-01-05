@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const { use } = require('../routes/authRoutes');
 const labtest = require('../models/labtest');
+const order = require('../models/order');
 const jwtsecret = "ohcappapijwt";
 
 
@@ -601,4 +602,70 @@ exports.register_pharmacy = async (req, res) => {
     }
   });
 };
+
+exports.hbot_order = async (req, res) => {
+  try {
+    const { fullname,phone_number,address,city,state,zip_code,date,start_time,end_time } = req.body;
+    // console.log(req.user)
+    await order.create({
+      user_id:req.user.userId,
+      type:"HBOT",
+      fullname,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date:new Date(date),
+      start_time,
+      end_time
+    });
+      return res.status(404).json({
+        message: 'Appointment Submit successfull',
+        status: true,
+      });
+    
+
+  } catch (error) {
+    console.error('Error Submitting HBOT appointment:', error);
+    res.status(500).json({
+      message: 'Something went wrong',
+      status: false,
+    });
+  }
+}
+
+exports.lab_order = async (req, res) => {
+  try {
+    const { lab_id,test_id,fullname,phone_number,address,city,state,zip_code,date,start_time,end_time } = req.body;
+    // console.log(req.user)
+    await order.create({
+      lab_id,
+      test_id,
+      user_id:req.user.userId,
+      type:"LAB",
+      fullname,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date:new Date(date),
+      start_time,
+      end_time
+    });
+      return res.status(404).json({
+        message: 'Lab Appointment Submit successfull',
+        status: true,
+      });
+    
+
+  } catch (error) {
+    console.error('Error Submitting HBOT appointment:', error);
+    res.status(500).json({
+      message: 'Something went wrong',
+      status: false,
+    });
+  }
+}
 
