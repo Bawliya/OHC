@@ -105,7 +105,7 @@ exports.getDashboardData = async (req, res) => {
     const users = await User.countDocuments({userType:"User"});
     const pharmacy_clinic = await User.countDocuments({userType:"Pharmacy Clinic"});
     const lab_test_doctor = await User.countDocuments({userType:"Lab Test Doctor"});
-    const order = await order.countDocuments();
+    const orders = await order.countDocuments();
     const latest_user = await User.find().sort({createdAt:-1}).limit(10);
 
     res.status(200).json({
@@ -115,7 +115,7 @@ exports.getDashboardData = async (req, res) => {
         users,
         pharmacy_clinic,
         lab_test_doctor,
-        order,
+        order:orders,
         latest_user
       }
     });
