@@ -620,7 +620,7 @@ exports.hbot_order = async (req, res) => {
       start_time,
       end_time
     });
-      return res.status(404).json({
+      return res.status(200).json({
         message: 'Appointment Submit successfull',
         status: true,
       });
@@ -654,7 +654,7 @@ exports.lab_order = async (req, res) => {
       start_time,
       end_time
     });
-      return res.status(404).json({
+      return res.status(200).json({
         message: 'Lab Appointment Submit successfull',
         status: true,
       });
