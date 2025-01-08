@@ -8,6 +8,8 @@ const { use } = require('../routes/authRoutes');
 const labtest = require('../models/labtest');
 const order = require('../models/order');
 const jwtsecret = "ohcappapijwt";
+const mongoose = require("mongoose");
+
 
 
 // Configure multer for image uploads
@@ -479,7 +481,7 @@ exports.register_lab = async (req, res) => {
           for (let i = 0; i < tests_list.length; i++) {
             const test = tests_list[i];
             var lab = new labtest({
-              lab_id: existingUser._id,
+              lab_id: newUser._id,
               name: tests_list[i].name,
               price: tests_list[i].price
             });
@@ -671,15 +673,14 @@ exports.lab_order = async (req, res) => {
 
 exports.get_booked_appoinment = async (req, res) => {
   try {
-    const matchCondition = { user_id: req.user.userId };
-
     if (req.body.type === "LAB") {
       
 
     const bookedAppointments = await order.aggregate([
       {
         $match: {
-          type:req.body.type
+          type:req.body.type,
+          user_id: new mongoose.Types.ObjectId(req.user.userId)
         }, // Filter orders based on user_id and type
       },
       {
@@ -755,6 +756,92 @@ exports.get_booked_appoinment = async (req, res) => {
       data: bookedAppointments,
     });
   }
+  } catch (error) {
+    console.error("Error fetching lab appointments:", error);
+    res.status(500).json({
+      message: "Something went wrong",
+      status: false,
+    });
+  }
+};
+exports.get_lab_order = async (req, res) => {
+  try {
+    console.log(req.user.userId)
+    const matchCondition = { lab_id: new mongoose.Types.ObjectId(req.user.userId) };
+
+    const bookedAppointments = await order.aggregate([
+      {
+        $match: matchCondition, // Filter orders based on user_id and type
+      },
+      {
+        $lookup: {
+          from: "labtests", // Name of the 'test' collection
+          let: { testIds: "$test_id" }, // Pass the test_id array to the pipeline
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$_id", "$$testIds"], // Match all test IDs in the array
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1, // Include only the fields you need from the 'tests' collection
+              },
+            },
+          ],
+          as: "test_details", // Alias for the joined test data
+        },
+      },
+      {
+        $lookup: {
+          from: "users", // Name of the 'user' collection
+          localField: "user_id", // Field in the order collection
+          foreignField: "_id", // Field in the user collection
+          as: "user_details", // Alias for the joined lab data
+        },
+      },
+      {
+        $unwind:"$user_details"
+      },
+      {
+        $project: {
+          _id: 1,
+          user_id: 1,
+          type: 1,
+          lab_id: 1,
+          fullname: 1,
+          phone_number: 1,
+          address: 1,
+          city: 1,
+          state: 1,
+          zip_code: 1,
+          date: 1,
+          start_time: 1,
+          end_time: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          test_details: "$test_details",
+          user_details: {
+            _id: 1,
+            fullName: 1, // Include only the 'name' field from the lab/user
+            phoneNumber:1,
+            address:1,
+            city:1,
+            state:1
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      message: "Lab Appointment fetched successfully",
+      status: true,
+      data: bookedAppointments,
+    });
+ 
   } catch (error) {
     console.error("Error fetching lab appointments:", error);
     res.status(500).json({
