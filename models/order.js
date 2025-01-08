@@ -15,9 +15,10 @@ const orderSchema = new mongoose.Schema(
     lab_id: { 
       type: mongoose.Schema.Types.ObjectId, 
     },
-    test_id: { 
-      type: mongoose.Schema.Types.ObjectId, 
-    },
+    test_id: [{ // Changed to an array of ObjectId
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'labs', // Assuming you have a 'labs' collection
+    }],
     fullname: { 
       type: String, 
       required: true, 

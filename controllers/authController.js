@@ -669,3 +669,100 @@ exports.lab_order = async (req, res) => {
   }
 }
 
+exports.get_booked_appoinment = async (req, res) => {
+  try {
+    const matchCondition = { user_id: req.user.userId };
+
+    if (req.body.type === "LAB") {
+      
+
+    const bookedAppointments = await order.aggregate([
+      {
+        $match: {
+          type:req.body.type
+        }, // Filter orders based on user_id and type
+      },
+      {
+        $lookup: {
+          from: "labtests", // Name of the 'test' collection
+          let: { testIds: "$test_id" }, // Pass the test_id array to the pipeline
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$_id", "$$testIds"], // Match all test IDs in the array
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1, // Include only the fields you need from the 'tests' collection
+              },
+            },
+          ],
+          as: "test_details", // Alias for the joined test data
+        },
+      },
+      {
+        $lookup: {
+          from: "users", // Name of the 'user' collection
+          localField: "lab_id", // Field in the order collection
+          foreignField: "_id", // Field in the user collection
+          as: "lab_details", // Alias for the joined lab data
+        },
+      },
+      {
+        $unwind:"$lab_details"
+      },
+      {
+        $project: {
+          _id: 1,
+          user_id: 1,
+          type: 1,
+          lab_id: 1,
+          fullname: 1,
+          phone_number: 1,
+          address: 1,
+          city: 1,
+          state: 1,
+          zip_code: 1,
+          date: 1,
+          start_time: 1,
+          end_time: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          test_details: "$test_details",
+          lab_details: {
+            _id: 1,
+            fullName: 1, // Include only the 'name' field from the lab/user
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      message: "Lab Appointment fetched successfully",
+      status: true,
+      data: bookedAppointments,
+    });
+  }else{
+    const bookedAppointments = await order.find({type:req.body.type,user_id: req.user.userId});
+
+    return res.status(200).json({
+      message: "HBOT Appointment fetched successfully",
+      status: true,
+      data: bookedAppointments,
+    });
+  }
+  } catch (error) {
+    console.error("Error fetching lab appointments:", error);
+    res.status(500).json({
+      message: "Something went wrong",
+      status: false,
+    });
+  }
+};
+
+
+

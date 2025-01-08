@@ -120,4 +120,41 @@ exports.getPharmacy = async (req, res) => {
       });
     }
   };
+
+  exports.getService = async (req, res) => {
+    try {
+      const service = await Video.find({video_type:"service"});
+  
+      // Return the data
+      res.status(200).json({
+        status: true,
+        message: 'Service data fetched successfully',
+        data: service,
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: false,
+        message: 'Failed to fetch Service data',
+        error: err.message,
+      });
+    }
+  };
+  exports.getTestmonial = async (req, res) => {
+    try {
+      const testmonial = await Video.find({video_type:"testmonial"});
+  
+      // Return the data
+      res.status(200).json({
+        status: true,
+        message: 'Testmonial data fetched successfully',
+        data: testmonial,
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: false,
+        message: 'Failed to fetch Testmonial data',
+        error: err.message,
+      });
+    }
+  };
   
