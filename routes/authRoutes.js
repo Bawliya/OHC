@@ -9,6 +9,7 @@ const bannerController = require('../controllers/bannercontroller');
 const categoryController = require('../controllers/caategorycontroller');
 const homeController = require('../controllers/homeController');
 const adminController = require('../controllers/admincontroller');
+const chatController = require('../controllers/chatcontroller');
 const {
   createVideo,
   getAllVideos,
@@ -45,6 +46,13 @@ router.get('/getPharmacy',auth, homeController.getPharmacy);
 router.post('/searchByCityAndType',auth, homeController.searchByCityAndType);
 router.get('/getService',auth, homeController.getService);
 router.get('/getTestmonial',auth, homeController.getTestmonial);
+
+
+router.post('/createChat',auth, chatController.createChat);
+router.post('/sendMessage',auth, chatController.sendMessage);
+router.post('/getChat',auth, chatController.getChat);
+
+
 
 
  

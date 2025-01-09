@@ -3,6 +3,7 @@ const Category = require('../models/category'); // Assuming you have a Category 
 const userModel = require('../models/userModel');
 const LabTest = require('../models/labtest');
 const Video = require('../models/video');
+const mongoose = require("mongoose");
 
 // Fetch homepage data
 exports.getHomePageData = async (req, res) => {
@@ -68,24 +69,56 @@ exports.getLabs = async (req, res) => {
 
 
 exports.getPharmacy = async (req, res) => {
-    try {
-      // Fetch all banners
-      const Pharmacy = await userModel.find({userType:"Pharmacy Clinic"});
-  
-      // Return the data
-      res.status(200).json({
-        status: true,
-        message: 'Pharmacy data fetched successfully',
-        data: Pharmacy,
-      });
-    } catch (err) {
-      res.status(500).json({
-        status: false,
-        message: 'Failed to fetch home page data',
-        error: err.message,
-      });
-    }
-  };
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user.userId); // Get the user ID from the request
+    const Pharmacy = await userModel.find({ userType: "Pharmacy Clinic" });
+
+    // Aggregation to check if a chat exists between the user and each pharmacy
+    const pharmaciesWithChatStatus = await userModel.aggregate([
+      { 
+        $match: { userType: "Pharmacy Clinic" }  // Match pharmacies
+      },
+      {
+        $lookup: {
+          from: 'chats',  // Chats collection
+          let: { pharmacyId: "$_id" },  // Pharmacy ID to join
+          pipeline: [
+            { $match: { 
+                $expr: { 
+                  $or: [
+                    { $and: [{ $eq: ["$from", userId] }, { $eq: ["$to", "$$pharmacyId"] }] },
+                    { $and: [{ $eq: ["$to", userId] }, { $eq: ["$from", "$$pharmacyId"] }] }
+                  ]
+                }
+              }
+            },
+            { $project: { _id: 1 } }
+          ],
+          as: 'chat'  // Name of the field to store the matched chats
+        }
+      },
+      {
+        $addFields: {
+          chat: { $cond: [{ $gt: [{ $size: "$chat" }, 0] }, true, false] },  // If chat exists, set 'chat' to true
+          chat_id: { $arrayElemAt: ["$chat._id", 0] }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      status: true,
+      message: 'Pharmacy data fetched successfully',
+      data: pharmaciesWithChatStatus,  // Send pharmacies with chat status
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to fetch pharmacy data',
+      error: err.message,
+    });
+  }
+};
+
 
   exports.searchByCityAndType = async (req, res) => {
     try {
