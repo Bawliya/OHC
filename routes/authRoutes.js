@@ -1,5 +1,5 @@
 const express = require('express');
-const { login,get_booked_appoinment,get_lab_order, verifyOtp,otpSend,updatePasswordWithOldPassword, register,register_lab,register_pharmacy,updatePassword ,hbot_order,lab_order} = require('../controllers/authController');
+const { login, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order } = require('../controllers/authController');
 
 const router = express.Router();
 const multer = require('multer');
@@ -32,39 +32,40 @@ router.post('/register', register);
 router.post('/register_lab', register_lab);
 router.post('/register_pharmacy', register_pharmacy);
 
-router.post('/updatePassword',auth, updatePassword);
-router.post('/updatePasswordWithOldPassword',auth, updatePasswordWithOldPassword);
+router.post('/updatePassword', auth, updatePassword);
+router.post('/updatePasswordWithOldPassword', auth, updatePasswordWithOldPassword);
 
 // Home Page API
-router.post('/hbot_order',auth, hbot_order);
-router.post('/lab_order',auth, lab_order);
-router.post('/get_booked_appoinment',auth, get_booked_appoinment);
-router.get('/get_lab_order',auth, get_lab_order);
-router.get('/home',auth, homeController.getHomePageData);
-router.get('/getLabs',auth, homeController.getLabs);
-router.get('/getPharmacy',auth, homeController.getPharmacy);
-router.post('/searchByCityAndType',auth, homeController.searchByCityAndType);
-router.get('/getService',auth, homeController.getService);
-router.get('/getTestmonial',auth, homeController.getTestmonial);
+router.post('/hbot_order', auth, hbot_order);
+router.post('/lab_order', auth, lab_order);
+router.post('/get_booked_appoinment', auth, get_booked_appoinment);
+router.get('/get_lab_order', auth, get_lab_order);
+router.get('/home', auth, homeController.getHomePageData);
+router.get('/getLabs', auth, homeController.getLabs);
+router.get('/getPharmacy', auth, homeController.getPharmacy);
+router.post('/searchByCityAndType', auth, homeController.searchByCityAndType);
+router.get('/getService', auth, homeController.getService);
+router.get('/getTestmonial', auth, homeController.getTestmonial);
 
 
-router.post('/createChat',auth, chatController.createChat);
-router.post('/sendMessage',auth, chatController.sendMessage);
-router.post('/getChat',auth, chatController.getChat);
+router.post('/createChat', auth, chatController.createChat);
+router.post('/sendMessage', auth, chatController.sendMessage);
+router.post('/getChat', auth, chatController.getChat);
+router.get('/getGlobalChat', auth, chatController.getGlobalChat);
 
 
 
 
- 
+
 
 //   admin apis ===================================================>
 
-  // Admin registration route
+// Admin registration route
 router.post('/admin/register', adminController.registerAdmin);
 
 // Admin login route
 router.post('/admin/login', adminController.loginAdmin);
- 
+
 router.get('/user/get', adminController.getUsersByType);
 router.get('/getDashboardData', adminController.getDashboardData);
 router.get('/getOrders', adminController.getOrders);
