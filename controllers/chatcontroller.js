@@ -43,13 +43,13 @@ const sendMessage = async (req, res) => {
     const { message, chat_id } = req.body;  // message, chat_id, and recipient from the body
 
     if (!message || !chat_id) {
-      return res.status(400).json({ message: 'Message, chat_id are required' });
+      return res.status(400).json({ status: false, message: 'Message, chat_id are required' });
     }
 
     // Check if the chat_id exists
     const chat = await Chat.findById({ _id: chat_id });
     if (!chat) {
-      return res.status(404).json({ message: 'Chat not found' });
+      return res.status(404).json({ status: false, message: 'Chat not found' });
     }
 
     // Set from and to based on the chat_id
@@ -66,10 +66,10 @@ const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
-    res.status(201).json({ message: 'Message sent successfully', newMessage });
+    res.status(201).json({ status: true, message: 'Message sent successfully', newMessage });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ status: false, message: 'Server error' });
   }
 };
 
@@ -79,7 +79,7 @@ const getChat = async (req, res) => {
     const { chat_id } = req.body;  // Chat ID from the request body
 
     if (!chat_id) {
-      return res.status(400).json({ message: 'Chat ID is required' });
+      return res.status(400).json({ status: false, message: 'Chat ID is required' });
     }
 
     // Aggregation pipeline to fetch messages and add isOwnMessage field
@@ -94,14 +94,10 @@ const getChat = async (req, res) => {
       }
     ]);
 
-    if (!chatMessages || chatMessages.length === 0) {
-      return res.status(404).json({ message: 'Chat not found' });
-    }
-
-    res.status(200).json({ chat: chatMessages });
+    return res.status(200).json({ status: true, message: "Chat get success", chat: chatMessages });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ status: false, message: 'Server error' });
   }
 };
 
@@ -159,9 +155,6 @@ const getGlobalChat = async (req, res) => {
       }
     ]);
 
-    if (!chats || chats.length === 0) {
-      return res.status(404).json({ status: false, message: 'No chats found' });
-    }
 
     res.status(200).json({ status: true, message: 'Chats retrieved successfully', chats });
   } catch (error) {
