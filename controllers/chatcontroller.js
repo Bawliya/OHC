@@ -43,6 +43,7 @@ const sendMessage = async (req, res) => {
   try {
     const userId = req.user.userId;  // Extracted from the token (user sending the message)
     const { message, chat_id, time } = req.body;  // message, chat_id, and recipient from the body
+    console.log(req.body)
 
     if (!message || !chat_id) {
       return res.status(400).json({ status: false, message: 'Message, chat_id are required' });
@@ -70,13 +71,14 @@ const sendMessage = async (req, res) => {
     await newMessage.save();
 
     // Publish the message to Ably
-    const channelName = `chat:${chat_id}`;
+    const channelName = `chat:${toUser}`;
     const channel = ably.channels.get(channelName);
 
     channel.publish('new-message', {
       time: time,
       message: message,
       chat_id: chat_id,
+      isOwnMessage: false
     });
 
     res.status(201).json({ status: true, message: 'Message sent successfully', newMessage });
