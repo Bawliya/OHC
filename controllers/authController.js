@@ -121,7 +121,7 @@ exports.login = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-  
+
   try {
     // Validate the input
     if (!email || !otp) {
@@ -132,7 +132,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     // Find the user by email
-    const user = await User.findOne({ email:email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {
       return res.status(404).json({
@@ -255,11 +255,39 @@ exports.updatePassword = async (req, res) => {
   }
 }
 
+exports.update_device_id = async (req, res) => {
+  try {
+    const { device_id } = req.body;
+    const user_id = req.user.userId;
+
+    const user = await User.findOne({ _id: user_id });
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+        status: false,
+      });
+    }
+    // // Hash the new password
+    user.device_id = device_id;
+    user.save();
+    res.status(200).json({
+      message: 'device_id updated successfully',
+      status: true,
+    });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({
+      message: 'Error updating password',
+      status: false,
+    });
+  }
+}
+
 exports.otpSend = async (req, res) => {
   try {
     const { email } = req.body;
     const otp = "1234";
-    const user = await User.findOne({ email:email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({
         message: 'User not found',
@@ -607,26 +635,26 @@ exports.register_pharmacy = async (req, res) => {
 
 exports.hbot_order = async (req, res) => {
   try {
-    const { fullname,phone_number,address,city,state,zip_code,date,start_time,end_time } = req.body;
+    const { fullname, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
     await order.create({
-      user_id:req.user.userId,
-      type:"HBOT",
+      user_id: req.user.userId,
+      type: "HBOT",
       fullname,
       phone_number,
       address,
       city,
       state,
       zip_code,
-      date:new Date(date),
+      date: new Date(date),
       start_time,
       end_time
     });
-      return res.status(200).json({
-        message: 'Appointment Submit successfull',
-        status: true,
-      });
-    
+    return res.status(200).json({
+      message: 'Appointment Submit successfull',
+      status: true,
+    });
+
 
   } catch (error) {
     console.error('Error Submitting HBOT appointment:', error);
@@ -639,28 +667,28 @@ exports.hbot_order = async (req, res) => {
 
 exports.lab_order = async (req, res) => {
   try {
-    const { lab_id,test_id,fullname,phone_number,address,city,state,zip_code,date,start_time,end_time } = req.body;
+    const { lab_id, test_id, fullname, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
     await order.create({
       lab_id,
       test_id,
-      user_id:req.user.userId,
-      type:"LAB",
+      user_id: req.user.userId,
+      type: "LAB",
       fullname,
       phone_number,
       address,
       city,
       state,
       zip_code,
-      date:new Date(date),
+      date: new Date(date),
       start_time,
       end_time
     });
-      return res.status(200).json({
-        message: 'Lab Appointment Submit successfull',
-        status: true,
-      });
-    
+    return res.status(200).json({
+      message: 'Lab Appointment Submit successfull',
+      status: true,
+    });
+
 
   } catch (error) {
     console.error('Error Submitting HBOT appointment:', error);
@@ -674,88 +702,88 @@ exports.lab_order = async (req, res) => {
 exports.get_booked_appoinment = async (req, res) => {
   try {
     if (req.body.type === "LAB") {
-      
 
-    const bookedAppointments = await order.aggregate([
-      {
-        $match: {
-          type:req.body.type,
-          user_id: new mongoose.Types.ObjectId(req.user.userId)
-        }, // Filter orders based on user_id and type
-      },
-      {
-        $lookup: {
-          from: "labtests", // Name of the 'test' collection
-          let: { testIds: "$test_id" }, // Pass the test_id array to the pipeline
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $in: ["$_id", "$$testIds"], // Match all test IDs in the array
+
+      const bookedAppointments = await order.aggregate([
+        {
+          $match: {
+            type: req.body.type,
+            user_id: new mongoose.Types.ObjectId(req.user.userId)
+          }, // Filter orders based on user_id and type
+        },
+        {
+          $lookup: {
+            from: "labtests", // Name of the 'test' collection
+            let: { testIds: "$test_id" }, // Pass the test_id array to the pipeline
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ["$_id", "$$testIds"], // Match all test IDs in the array
+                  },
                 },
               },
-            },
-            {
-              $project: {
-                _id: 1,
-                name: 1, // Include only the fields you need from the 'tests' collection
+              {
+                $project: {
+                  _id: 1,
+                  name: 1, // Include only the fields you need from the 'tests' collection
+                },
               },
-            },
-          ],
-          as: "test_details", // Alias for the joined test data
-        },
-      },
-      {
-        $lookup: {
-          from: "users", // Name of the 'user' collection
-          localField: "lab_id", // Field in the order collection
-          foreignField: "_id", // Field in the user collection
-          as: "lab_details", // Alias for the joined lab data
-        },
-      },
-      {
-        $unwind:"$lab_details"
-      },
-      {
-        $project: {
-          _id: 1,
-          user_id: 1,
-          type: 1,
-          lab_id: 1,
-          fullname: 1,
-          phone_number: 1,
-          address: 1,
-          city: 1,
-          state: 1,
-          zip_code: 1,
-          date: 1,
-          start_time: 1,
-          end_time: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          test_details: "$test_details",
-          lab_details: {
-            _id: 1,
-            fullName: 1, // Include only the 'name' field from the lab/user
+            ],
+            as: "test_details", // Alias for the joined test data
           },
         },
-      },
-    ]);
+        {
+          $lookup: {
+            from: "users", // Name of the 'user' collection
+            localField: "lab_id", // Field in the order collection
+            foreignField: "_id", // Field in the user collection
+            as: "lab_details", // Alias for the joined lab data
+          },
+        },
+        {
+          $unwind: "$lab_details"
+        },
+        {
+          $project: {
+            _id: 1,
+            user_id: 1,
+            type: 1,
+            lab_id: 1,
+            fullname: 1,
+            phone_number: 1,
+            address: 1,
+            city: 1,
+            state: 1,
+            zip_code: 1,
+            date: 1,
+            start_time: 1,
+            end_time: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            test_details: "$test_details",
+            lab_details: {
+              _id: 1,
+              fullName: 1, // Include only the 'name' field from the lab/user
+            },
+          },
+        },
+      ]);
 
-    return res.status(200).json({
-      message: "Lab Appointment fetched successfully",
-      status: true,
-      data: bookedAppointments,
-    });
-  }else{
-    const bookedAppointments = await order.find({type:req.body.type,user_id: req.user.userId});
+      return res.status(200).json({
+        message: "Lab Appointment fetched successfully",
+        status: true,
+        data: bookedAppointments,
+      });
+    } else {
+      const bookedAppointments = await order.find({ type: req.body.type, user_id: req.user.userId });
 
-    return res.status(200).json({
-      message: "HBOT Appointment fetched successfully",
-      status: true,
-      data: bookedAppointments,
-    });
-  }
+      return res.status(200).json({
+        message: "HBOT Appointment fetched successfully",
+        status: true,
+        data: bookedAppointments,
+      });
+    }
   } catch (error) {
     console.error("Error fetching lab appointments:", error);
     res.status(500).json({
@@ -804,7 +832,7 @@ exports.get_lab_order = async (req, res) => {
         },
       },
       {
-        $unwind:"$user_details"
+        $unwind: "$user_details"
       },
       {
         $project: {
@@ -827,10 +855,10 @@ exports.get_lab_order = async (req, res) => {
           user_details: {
             _id: 1,
             fullName: 1, // Include only the 'name' field from the lab/user
-            phoneNumber:1,
-            address:1,
-            city:1,
-            state:1
+            phoneNumber: 1,
+            address: 1,
+            city: 1,
+            state: 1
           },
         },
       },
@@ -841,7 +869,7 @@ exports.get_lab_order = async (req, res) => {
       status: true,
       data: bookedAppointments,
     });
- 
+
   } catch (error) {
     console.error("Error fetching lab appointments:", error);
     res.status(500).json({
