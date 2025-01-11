@@ -82,12 +82,24 @@ exports.loginAdmin = async (req, res) => {
 // get all user api by type  
 exports.getUsersByType = async (req, res) => {
   try {
-    const { userType = User } = req.query;
-    console.log(userType)
-    const users = await User.find().sort({createdAt:-1});
+    const { userType = "User", search = "" } = req.query;
+
+    // Build the query
+    const query = {
+      userType,
+    };
+
+    // Add search condition if `search` is provided
+    if (search) {
+      query.$or = [
+        { fullName: { $regex: search, $options: "i" } }, // Case-insensitive search in fullName
+        { email: { $regex: search, $options: "i" } }, // Case-insensitive search in email
+      ];
+    }
+    const users = await User.find(query).sort({ createdAt: -1 });
     res.status(200).json({
       status: true,
-      message:"User get success",
+      message: "User get success",
       data: users
     });
   } catch (err) {
@@ -102,20 +114,20 @@ exports.getUsersByType = async (req, res) => {
 
 exports.getDashboardData = async (req, res) => {
   try {
-    const users = await User.countDocuments({userType:"User"});
-    const pharmacy_clinic = await User.countDocuments({userType:"Pharmacy Clinic"});
-    const lab_test_doctor = await User.countDocuments({userType:"Lab Test Doctor"});
+    const users = await User.countDocuments({ userType: "User" });
+    const pharmacy_clinic = await User.countDocuments({ userType: "Pharmacy Clinic" });
+    const lab_test_doctor = await User.countDocuments({ userType: "Lab Test Doctor" });
     const orders = await order.countDocuments();
-    const latest_user = await User.find().sort({createdAt:-1}).limit(10);
+    const latest_user = await User.find().sort({ createdAt: -1 }).limit(10);
 
     res.status(200).json({
       status: true,
-      message:"User get success",
+      message: "User get success",
       data: {
         users,
         pharmacy_clinic,
         lab_test_doctor,
-        order:orders,
+        order: orders,
         latest_user
       }
     });
@@ -130,11 +142,13 @@ exports.getDashboardData = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
   try {
-    const data = await order.find();
+    const { type } = req.query;
+    console.log(type)
+    const data = await order.find({ type });
 
     res.status(200).json({
       status: true,
-      message:"Orders get success",
+      message: "Orders get success",
       data
     });
   } catch (err) {
