@@ -40,7 +40,7 @@ const createChat = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const userId = req.user.userId;  // Extracted from the token (user sending the message)
-    const { message, chat_id } = req.body;  // message, chat_id, and recipient from the body
+    const { message, chat_id, time } = req.body;  // message, chat_id, and recipient from the body
 
     if (!message || !chat_id) {
       return res.status(400).json({ status: false, message: 'Message, chat_id are required' });
@@ -59,6 +59,7 @@ const sendMessage = async (req, res) => {
     // Create a new message in the specified chat
     const newMessage = new Message({
       from: fromUser,
+      time: time,
       to: toUser,  // recipient of the message
       chat_id: chat_id,
       message: message
