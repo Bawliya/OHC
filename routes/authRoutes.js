@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order } = require('../controllers/authController');
+const { login, update_device_id, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order } = require('../controllers/authController');
 
 const router = express.Router();
 const multer = require('multer');
@@ -33,6 +33,7 @@ router.post('/register_lab', register_lab);
 router.post('/register_pharmacy', register_pharmacy);
 
 router.post('/updatePassword', auth, updatePassword);
+router.post('/update_device_id', auth, update_device_id);
 router.post('/updatePasswordWithOldPassword', auth, updatePasswordWithOldPassword);
 
 // Home Page API
