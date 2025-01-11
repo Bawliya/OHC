@@ -78,10 +78,15 @@ const sendMessage = async (req, res) => {
       time: time,
       message: message,
       chat_id: chat_id,
-      isOwnMessage: false
+      isOwnMessage: true
     });
 
-    res.status(201).json({ status: true, message: 'Message sent successfully', newMessage });
+    const responseMessage = {
+      ...newMessage.toObject(), // Convert Mongoose document to plain object
+      isOwnMessage: true, // Add isOwnMessage to the response
+    };
+
+    res.status(201).json({ status: true, message: 'Message sent successfully', newMessage: responseMessage });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: false, message: 'Server error' });
