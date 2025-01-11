@@ -164,6 +164,7 @@ const getGlobalChat = async (req, res) => {
         $project: {
           chat_id: '$_id',
           business_name: '$oppositePerson.fullName', // Assuming 'name' is a field in the user collection
+          oppositePersonId: '$oppositePerson._id', // Assuming 'name' is a field in the user collection
         }
       }
     ]);
