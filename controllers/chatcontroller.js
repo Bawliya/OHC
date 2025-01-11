@@ -1,6 +1,8 @@
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const mongoose = require("mongoose");
+const Ably = require('ably');
+const ably = new Ably.Realtime('mRdzeA.OTXF_g:iRpgK5EGtzakR8SAs3hE39nRIKr1fupgTBqXHVkOqZE'); // Replace with your Ably API key
 
 const createChat = async (req, res) => {
   try {
@@ -66,6 +68,16 @@ const sendMessage = async (req, res) => {
     });
 
     await newMessage.save();
+
+    // Publish the message to Ably
+    const channelName = `chat:${chat_id}`;
+    const channel = ably.channels.get(channelName);
+
+    channel.publish('new-message', {
+      time: time,
+      message: message,
+      chat_id: chat_id,
+    });
 
     res.status(201).json({ status: true, message: 'Message sent successfully', newMessage });
   } catch (error) {
@@ -151,7 +163,7 @@ const getGlobalChat = async (req, res) => {
       {
         $project: {
           chat_id: '$_id',
-          name: '$oppositePerson.fullName', // Assuming 'name' is a field in the user collection
+          business_name: '$oppositePerson.fullName', // Assuming 'name' is a field in the user collection
         }
       }
     ]);
