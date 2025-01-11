@@ -665,6 +665,35 @@ exports.hbot_order = async (req, res) => {
   }
 }
 
+exports.yoga_order = async (req, res) => {
+  try {
+    const { fullname, phone_number, address, city, state, zip_code } = req.body;
+    // console.log(req.user)
+    await order.create({
+      user_id: req.user.userId,
+      type: "YOGA",
+      fullname,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+    });
+    return res.status(200).json({
+      message: 'Query Submit successfull',
+      status: true,
+    });
+
+
+  } catch (error) {
+    console.error('Error Submitting HBOT appointment:', error);
+    res.status(500).json({
+      message: 'Something went wrong',
+      status: false,
+    });
+  }
+}
+
 exports.lab_order = async (req, res) => {
   try {
     const { lab_id, test_id, fullname, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
