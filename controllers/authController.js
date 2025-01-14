@@ -9,6 +9,9 @@ const labtest = require('../models/labtest');
 const order = require('../models/order');
 const jwtsecret = "ohcappapijwt";
 const mongoose = require("mongoose");
+const OneSignal = require('onesignal-node');
+const https = require('https');
+const oneSignalClient = new OneSignal.Client('41e4de85-be9f-4f97-8458-c3278921f967', 'os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq');
 
 
 
@@ -713,6 +716,49 @@ exports.lab_order = async (req, res) => {
       start_time,
       end_time
     });
+    // Fetch the lab's player ID (device_id) from the User table
+    const labUser = await User.findById({ _id: lab_id });
+
+    if (!labUser || !labUser.device_id) {
+      return res.status(404).json({
+        message: 'Lab user not found or device_id missing',
+        status: false,
+      });
+    }
+
+    const playerId = labUser.device_id; // Player ID for the lab's device
+    console.log([playerId])
+    const notificationMessage = `New Lab Appointment: ${fullname} has booked an appointment.`;
+    const notificationTitle = "Lab Appointment Notification";
+    const notificationData = {
+      fullname,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date,
+      start_time,
+      end_time,
+    };
+
+    sendNotification([playerId], notificationMessage, notificationTitle, notificationData);
+
+    // Send notification to the lab using OneSignal
+    // const notification = {
+    //   app_id: "41e4de85-be9f-4f97-8458-c3278921f967",
+    //   contents: {
+    //     en: `New Lab Appointment: ${fullname} has booked an appointment.`,
+    //   },
+    //   headings: {
+    //     en: "Lab Appointment Notification",
+    //   },
+    //   include_player_ids: ["0487e67b-106d-4289-915e-1a07cf936fba"], // Send notification to the lab's device
+    // };
+
+    // var abc = await oneSignalClient.createNotification(notification);
+    // console.log(abc)
+
     return res.status(200).json({
       message: 'Lab Appointment Submit successfull',
       status: true,
@@ -727,6 +773,45 @@ exports.lab_order = async (req, res) => {
     });
   }
 }
+
+const sendNotification = (playerIds, message, title, dataItem) => {
+  const app_id = "41e4de85-be9f-4f97-8458-c3278921f967";
+  const apiKey = "os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq";
+
+  const notification = {
+    app_id: app_id,
+    contents: { en: message },
+    headings: { en: title },
+    data: dataItem,
+    include_player_ids: playerIds,
+    url: "https://example.com/lab-appointment-details", // Replace with the actual URL
+    image: "https://example.com/logo.png", // Replace with your logo URL
+  };
+
+  const options = {
+    host: "onesignal.com",
+    port: 443,
+    path: "/api/v1/notifications",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Authorization": `Basic ${apiKey}`
+    }
+  };
+
+  const req = https.request(options, (res) => {
+    res.on('data', (data) => {
+      console.log("Notification Response:", JSON.parse(data.toString()));
+    });
+  });
+
+  req.on('error', (e) => {
+    console.error("Notification Error:", e);
+  });
+
+  req.write(JSON.stringify(notification));
+  req.end();
+};
 
 exports.get_booked_appoinment = async (req, res) => {
   try {

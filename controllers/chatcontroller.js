@@ -42,7 +42,7 @@ const createChat = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const userId = req.user.userId;  // Extracted from the token (user sending the message)
-    const { message, chat_id, time } = req.body;  // message, chat_id, and recipient from the body
+    const { message, chat_id, time, type } = req.body;  // message, chat_id, and recipient from the body
     console.log(userId)
 
     if (!message || !chat_id) {
@@ -65,7 +65,8 @@ const sendMessage = async (req, res) => {
       time: time,
       to: toUser,  // recipient of the message
       chat_id: chat_id,
-      message: message
+      message: message,
+      type: type
     });
 
     await newMessage.save();
@@ -80,7 +81,8 @@ const sendMessage = async (req, res) => {
       time: time,
       message: message,
       chat_id: chat_id,
-      isOwnMessage: true
+      isOwnMessage: true,
+      type: type
     });
 
     const responseMessage = {
@@ -186,8 +188,29 @@ const getGlobalChat = async (req, res) => {
   }
 };
 
+const uploadimage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ status: false, message: 'Image is required' });
+    }
+    const image = req.file.filename;
+
+    res.status(201).json({
+      status: true,
+      message: 'Banner created successfully',
+      data: image,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to upload image',
+      error: err.message,
+    });
+  }
+};
 
 
 
 
-module.exports = { createChat, sendMessage, getChat, getGlobalChat };
+
+module.exports = { createChat, sendMessage, getChat, getGlobalChat, uploadimage };

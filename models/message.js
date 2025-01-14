@@ -20,6 +20,10 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  type: {
+    type: String,
+    default: "text"
+  },
   time: {
     type: String,
     required: true

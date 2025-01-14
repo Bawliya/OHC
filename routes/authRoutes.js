@@ -54,6 +54,8 @@ router.post('/createChat', auth, chatController.createChat);
 router.post('/sendMessage', auth, chatController.sendMessage);
 router.post('/getChat', auth, chatController.getChat);
 router.get('/getGlobalChat', auth, chatController.getGlobalChat);
+router.post('/uploadimage', auth, upload.single('image'), chatController.uploadimage);
+
 
 
 
