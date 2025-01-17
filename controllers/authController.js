@@ -670,7 +670,7 @@ exports.hbot_order = async (req, res) => {
 
 exports.yoga_order = async (req, res) => {
   try {
-    const { fullname, phone_number, address, city, state, zip_code } = req.body;
+    const { fullname, phone_number, address, city, state, zip_code, date, start_time, end_time, yogaType } = req.body;
     // console.log(req.user)
     await order.create({
       user_id: req.user.userId,
@@ -680,7 +680,7 @@ exports.yoga_order = async (req, res) => {
       address,
       city,
       state,
-      zip_code,
+      zip_code, date, start_time, end_time, yogaType
     });
     return res.status(200).json({
       message: 'Query Submit successfull',
