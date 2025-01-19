@@ -745,13 +745,14 @@ exports.lab_order = async (req, res) => {
 
     sendNotification([playerId], notificationMessage, notificationTitle, notificationData);
 
-    new Notification({
+    var noti = new Notification({
       title: notificationTitle,
       message: notificationMessage,
       from: req.user.userId,
       to: lab_id,
       type: "lab_order"
     })
+    await noti.save();
 
     // Send notification to the lab using OneSignal
     // const notification = {
