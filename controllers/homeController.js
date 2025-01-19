@@ -3,6 +3,8 @@ const Category = require('../models/category'); // Assuming you have a Category 
 const userModel = require('../models/userModel');
 const LabTest = require('../models/labtest');
 const Video = require('../models/video');
+const Order = require('../models/order');
+const yoga = require('../models/yoga');
 const mongoose = require("mongoose");
 
 // Fetch homepage data
@@ -13,28 +15,70 @@ exports.getHomePageData = async (req, res) => {
 
     // Fetch all categories
     const categories = await Category.find();
-    const service = await Video.find({video_type:"service"});
-    const testmonial = await Video.find({video_type:"testmonial"});
+
+    // Fetch service and testimonial videos
+    const service = await Video.find({ video_type: "service" }).limit(4);
+    const testimonial = await Video.find({ video_type: "testimonial" }).limit(4);
+
+    // Fetch the user's yoga orders
+    const orders = await Order.find({
+      user_id: req.user.userId,
+      type: "YOGA",
+    });
+
+    // Fetch the yoga entry
+    const yogaEntry = await yoga.findOne().lean();
+
+    let yogaStatus = null; // Variable to store yoga class status
+    let purchase = false; // Variable to indicate if the user has purchased yoga
+
+    if (yogaEntry) {
+      const currentTime = new Date(); // Current timestamp
+      const yogaStartTime = new Date(`${new Date().toISOString().split("T")[0]}T${yogaEntry.time}`); // Today's date with yoga time
+      const yogaEndTime = new Date(yogaStartTime.getTime() + yogaEntry.duration * 60 * 60 * 1000); // Convert duration (hours) to milliseconds
+
+      // Determine yoga class status: live, upcoming, or ended
+      if (currentTime >= yogaStartTime && currentTime <= yogaEndTime) {
+        yogaStatus = "live";
+      } else if (currentTime < yogaStartTime) {
+        yogaStatus = "upcoming";
+      } else {
+        yogaStatus = "ended";
+      }
+
+      // Check if the user has purchased yoga
+      if (orders.length > 0) {
+        purchase = true;
+      }
+    }
 
     // Return the data
     res.status(200).json({
       status: true,
-      message: 'Home page data fetched successfully',
+      message: "Home page data fetched successfully",
       data: {
         banners,
         categories,
         service,
-        testmonial
+        testimonial,
+        yoga: yogaEntry
+          ? {
+              ...yogaEntry,
+              status: yogaStatus,
+              purchase,
+            }
+          : null,
       },
     });
   } catch (err) {
     res.status(500).json({
       status: false,
-      message: 'Failed to fetch home page data',
+      message: "Failed to fetch home page data",
       error: err.message,
     });
   }
 };
+
 
 exports.getLabs = async (req, res) => {
   try {

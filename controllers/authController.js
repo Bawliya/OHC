@@ -639,12 +639,13 @@ exports.register_pharmacy = async (req, res) => {
 
 exports.hbot_order = async (req, res) => {
   try {
-    const { fullname, sessionPlan, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const { fullname, sessionPlan,amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
     await order.create({
       user_id: req.user.userId,
       type: "HBOT",
       fullname,
+      amount,
       phone_number,
       sessionPlan,
       address,
@@ -701,7 +702,7 @@ exports.yoga_order = async (req, res) => {
 
 exports.lab_order = async (req, res) => {
   try {
-    const { lab_id, test_id, fullname, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const { lab_id, test_id, fullname,amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
     await order.create({
       lab_id,
@@ -713,6 +714,7 @@ exports.lab_order = async (req, res) => {
       address,
       city,
       state,
+      amount,
       zip_code,
       date: new Date(date),
       start_time,

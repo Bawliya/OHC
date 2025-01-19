@@ -10,6 +10,7 @@ const categoryController = require('../controllers/caategorycontroller');
 const homeController = require('../controllers/homeController');
 const adminController = require('../controllers/admincontroller');
 const chatController = require('../controllers/chatcontroller');
+const yogacontroller = require('../controllers/yogacontroller');
 const {
   createVideo,
   getAllVideos,
@@ -89,6 +90,8 @@ router.get('/categoryget/', categoryController.getAllCategories);
 router.get('/categorygetone/:id', categoryController.getCategoryById);
 router.put('/categoryupdate/:id', upload.single('image'), categoryController.updateCategory);
 router.delete('/categoryupdate/:id', categoryController.deleteCategory);
+
+router.post('/admin/createOrUpdate', yogacontroller.createOrUpdate);
 
 router.post("/videoadd", upload.fields([
   { name: "video", maxCount: 1 },
