@@ -76,6 +76,7 @@ router.post('/admin/sendNotificationByType', sendNotificationByType);
 
 router.get('/getDashboardData', adminController.getDashboardData);
 router.get('/getOrders', adminController.getOrders);
+router.get('/admin/getNotification', adminController.getNotification);
 
 router.post('/banneradd', upload.single('image'), bannerController.createBanner);
 router.get('/bannerget', bannerController.getAllBanners);
