@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const { use } = require('../routes/authRoutes');
 const labtest = require('../models/labtest');
+const Notification = require('../models/notification');
 const order = require('../models/order');
 const jwtsecret = "ohcappapijwt";
 const mongoose = require("mongoose");
@@ -743,6 +744,14 @@ exports.lab_order = async (req, res) => {
     };
 
     sendNotification([playerId], notificationMessage, notificationTitle, notificationData);
+
+    new Notification({
+      title: notificationTitle,
+      message: notificationMessage,
+      from: req.user.userId,
+      to: lab_id,
+      type: "lab_order"
+    })
 
     // Send notification to the lab using OneSignal
     // const notification = {
