@@ -639,13 +639,14 @@ exports.register_pharmacy = async (req, res) => {
 
 exports.hbot_order = async (req, res) => {
   try {
-    const { fullname, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const { fullname, sessionPlan, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
     await order.create({
       user_id: req.user.userId,
       type: "HBOT",
       fullname,
       phone_number,
+      sessionPlan,
       address,
       city,
       state,

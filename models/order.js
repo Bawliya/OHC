@@ -49,6 +49,9 @@ const orderSchema = new mongoose.Schema(
     start_time: {
       type: String,
     },
+    sessionPlan: {
+      type: String,
+    },
     yogaType: {
       type: String,
     },
