@@ -52,7 +52,6 @@ const orderSchema = new mongoose.Schema(
     },
     amount: {
       type: Number,
-      required: true,
     },
     start_time: {
       type: String,
