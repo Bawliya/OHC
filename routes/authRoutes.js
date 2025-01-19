@@ -76,6 +76,7 @@ router.post('/admin/login', adminController.loginAdmin);
 router.get('/user/get', adminController.getUsersByType);
 router.post('/admin/sendNotificationByType', sendNotificationByType);
 
+router.get('/admin/getYoga', adminController.getYoga);
 router.get('/getDashboardData', adminController.getDashboardData);
 router.get('/getOrders', adminController.getOrders);
 router.get('/admin/getNotification', adminController.getNotification);

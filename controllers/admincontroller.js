@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const Notificaion = require('../models/notification');
 const jwt = require('jsonwebtoken');
 const { default: mongoose } = require('mongoose');
+const yoga = require('../models/yoga');
 
 // Register Admin
 exports.registerAdmin = async (req, res) => {
@@ -219,86 +220,68 @@ exports.getDashboardData = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
   try {
-    const { type } = req.query;
-    console.log(type)
-    // if (type == "") {
-    //   const result = await Order.aggregate([
-    //     {
-    //       $match: {
-    //         lab_id: mongoose.Types.ObjectId(labId), // Match the lab_id
-    //       },
-    //     },
-    //     {
-    //       $unwind: "$test_id", // Flatten the test_id array
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: "tests", // Name of the tests collection
-    //         localField: "test_id",
-    //         foreignField: "_id",
-    //         as: "test_details",
-    //       },
-    //     },
-    //     {
-    //       $unwind: "$test_details", // Flatten the test_details array
-    //     },
-    //     {
-    //       $group: {
-    //         _id: "$lab_id", // Group by lab_id
-    //         totalAmount: { $sum: "$test_details.price" }, // Sum up the prices
-    //       },
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: "users", // Name of the users collection
-    //         localField: "_id", // lab_id from the group stage
-    //         foreignField: "_id",
-    //         as: "user_details",
-    //       },
-    //     },
-    //     {
-    //       $unwind: "$user_details", // Flatten the user_details array
-    //     },
-    //     {
-    //       $project: {
-    //         _id: 0, // Exclude the _id field from the output
-    //         lab_id: "$_id",
-    //         totalAmount: 1,
-    //         userDetails: {
-    //           fullName: "$user_details.fullName",
-    //           email: "$user_details.email",
-    //           phoneNumber: "$user_details.phoneNumber",
-    //           address: "$user_details.address",
-    //           city: "$user_details.city",
-    //           state: "$user_details.state",
-    //           zipCode: "$user_details.zipCode",
-    //           business_name: "$user_details.business_name",
-    //           whatsapp_number: "$user_details.whatsapp_number",
-    //           about_desc: "$user_details.about_desc",
-    //           image: "$user_details.image",
-    //           userType: "$user_details.userType",
-    //           device_id: "$user_details.device_id",
-    //         },
-    //       },
-    //     },
-    //   ]);
-    //   res.status(200).json({
-    //     status: true,
-    //     message: "Orders get success",
-    //     data
-    //   });
-    // }
-    const data = await order.find({ type });
+    const { type, payment_status, start_date, end_date } = req.query;
+
+    // Build the query object
+    let query = {};
+
+    // Filter by type if provided
+    if (type) {
+      if(type != "All"){
+        query.type = type;
+      }
+    }
+
+    // Filter by payment status if provided
+    if (payment_status) {
+      query.payment_status = payment_status.toLowerCase();
+    }
+
+    // Filter by date range if provided
+    if (start_date || end_date) {
+      query.date = {};
+      if (start_date) {
+        query.date.$gte = new Date(start_date);
+      }
+      if (end_date) {
+        query.date.$lte = new Date(end_date);
+      }
+    }
+
+    // Fetch the filtered data
+    const data = await order.find(query);
+
+    // Respond with the results
+    res.status(200).json({
+      status: true,
+      message: "Orders retrieved successfully",
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Failed to retrieve orders",
+      error: err.message,
+    });
+  }
+};
+
+
+exports.getYoga = async (req, res) => {
+  try {
+   
+   
+    const data = await yoga.findOne();
 
     res.status(200).json({
       status: true,
-      message: "Orders get success",
+      message: "Yoga get success",
       data
     });
   } catch (err) {
     res.status(500).json({
       status: false,
-      message: 'Failed to get users',
+      message: 'Failed to get yoga',
       error: err.message,
     });
   }

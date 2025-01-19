@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const YogaSchema = new mongoose.Schema({
   time: {
-    type: Date,
+    type: String,
     required: true,
   },
   link: {
