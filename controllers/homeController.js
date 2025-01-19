@@ -20,8 +20,30 @@ exports.getHomePageData = async (req, res) => {
     const service = await Video.find({ video_type: "service" }).limit(4);
     const testimonial = await Video.find({ video_type: "testimonial" }).limit(4);
 
+    // Return the data
+    res.status(200).json({
+      status: true,
+      message: "Home page data fetched successfully",
+      data: {
+        banners,
+        categories,
+        service,
+        testimonial,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Failed to fetch home page data",
+      error: err.message,
+    });
+  }
+};
+
+exports.getYoga = async (req, res) => {
+  try {
     // Fetch the user's yoga orders
-    const orders = await Order.find({
+    const orders = await Order.findOne({
       user_id: req.user.userId,
       type: "YOGA",
     });
@@ -31,6 +53,7 @@ exports.getHomePageData = async (req, res) => {
 
     let yogaStatus = null; // Variable to store yoga class status
     let purchase = false; // Variable to indicate if the user has purchased yoga
+    let yogaType = "demo"; // Variable to indicate if the user has purchased yoga
 
     if (yogaEntry) {
       const currentTime = new Date(); // Current timestamp
@@ -47,37 +70,38 @@ exports.getHomePageData = async (req, res) => {
       }
 
       // Check if the user has purchased yoga
-      if (orders.length > 0) {
+      if (orders) {
         purchase = true;
+        yogaType = orders.yogaType
       }
     }
 
-    // Return the data
+    const video = await Video.find({ video_type: "yoga" }).limit(4);
+
+    // Return the yoga data
     res.status(200).json({
       status: true,
-      message: "Home page data fetched successfully",
-      data: {
-        banners,
-        categories,
-        service,
-        testimonial,
-        yoga: yogaEntry
-          ? {
-              ...yogaEntry,
-              status: yogaStatus,
-              purchase,
-            }
-          : null,
-      },
+      message: "Yoga data fetched successfully",
+      data: yogaEntry
+        ? {
+            ...yogaEntry,
+            status: yogaStatus,
+            purchase,
+            yogaType,
+            video
+          }
+        : null,
     });
   } catch (err) {
     res.status(500).json({
       status: false,
-      message: "Failed to fetch home page data",
+      message: "Failed to fetch yoga data",
       error: err.message,
     });
   }
 };
+
+
 
 
 exports.getLabs = async (req, res) => {
