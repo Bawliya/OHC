@@ -4,12 +4,10 @@ const notificationSchema = new mongoose.Schema({
     from: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',
-        required: true,
     },
     to: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',
-        required: true,
     },
     title: {
         type: String,
@@ -22,6 +20,9 @@ const notificationSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true
+    },
+    noti_type: {
+        type: String,
     },
 },
     {

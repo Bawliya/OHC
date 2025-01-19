@@ -754,21 +754,6 @@ exports.lab_order = async (req, res) => {
     })
     await noti.save();
 
-    // Send notification to the lab using OneSignal
-    // const notification = {
-    //   app_id: "41e4de85-be9f-4f97-8458-c3278921f967",
-    //   contents: {
-    //     en: `New Lab Appointment: ${fullname} has booked an appointment.`,
-    //   },
-    //   headings: {
-    //     en: "Lab Appointment Notification",
-    //   },
-    //   include_player_ids: ["0487e67b-106d-4289-915e-1a07cf936fba"], // Send notification to the lab's device
-    // };
-
-    // var abc = await oneSignalClient.createNotification(notification);
-    // console.log(abc)
-
     return res.status(200).json({
       message: 'Lab Appointment Submit successfull',
       status: true,
@@ -784,7 +769,101 @@ exports.lab_order = async (req, res) => {
   }
 }
 
+exports.sendNotificationByType = async (req, res) => {
+  try {
+    const { userType, message, title } = req.body;
+
+    // Validate input
+    if (!userType || !message || !title) {
+      return res.status(400).json({
+        message: "userType, message, and title are required.",
+        status: false,
+      });
+    }
+
+    if (userType == "All") {
+      var obj = { device_id: { $exists: true, $ne: null } }
+    } else {
+      var obj = { userType, device_id: { $exists: true, $ne: null } }
+    }
+
+    // Find users of the given type with a valid player_id
+    const users = await User.find();
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        message: "No users found for the specified type.",
+        status: false,
+      });
+    }
+
+    // Extract player IDs
+    const playerIds = users.map(user => user.device_id);
+
+    // Send notification
+    const dataItem = { userType }; // Add any additional data you want to include
+    sendNotification(playerIds, message, title, dataItem);
+
+    var noti = new Notification({
+      type: userType,
+      message: message,
+      title: title,
+      noti_type: "admin"
+    })
+
+    await noti.save();
+
+    return res.status(200).json({
+      message: "Notification sent successfully.",
+      status: true,
+    });
+  } catch (error) {
+    console.error("Error sending notifications:", error);
+    res.status(500).json({
+      message: "Something went wrong.",
+      status: false,
+    });
+  }
+};
+
+exports.getNotification = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+        status: false,
+      });
+    }
+
+    // Fetch all notifications in a single query
+    const notifications = await Notification.find({
+      $or: [
+        { type: "All" }, // Global notifications for everyone
+        { type: user.userType }, // Notifications specific to the user's type
+        { to: req.user.userId, type: "lab_order" }, // Notifications specific to lab orders
+      ],
+    }).sort({ createdAt: -1 }); // Sort by latest first
+
+    return res.status(200).json({
+      message: "Notifications fetched successfully.",
+      status: true,
+      data: notifications,
+    });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({
+      message: "Something went wrong.",
+      status: false,
+    });
+  }
+};
+
+
+
 const sendNotification = (playerIds, message, title, dataItem) => {
+  console.log(playerIds)
   const app_id = "41e4de85-be9f-4f97-8458-c3278921f967";
   const apiKey = "os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq";
 

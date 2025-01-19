@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, yoga_order, update_device_id, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order } = require('../controllers/authController');
+const { login, yoga_order, getNotification, sendNotificationByType, update_device_id, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order } = require('../controllers/authController');
 
 const router = express.Router();
 const multer = require('multer');
@@ -41,6 +41,7 @@ router.post('/hbot_order', auth, hbot_order);
 router.post('/lab_order', auth, lab_order);
 router.post('/yoga_order', auth, yoga_order);
 router.post('/get_booked_appoinment', auth, get_booked_appoinment);
+router.get('/getNotification', auth, getNotification);
 router.get('/get_lab_order', auth, get_lab_order);
 router.get('/home', auth, homeController.getHomePageData);
 router.get('/getLabs', auth, homeController.getLabs);
@@ -71,6 +72,8 @@ router.post('/admin/register', adminController.registerAdmin);
 router.post('/admin/login', adminController.loginAdmin);
 
 router.get('/user/get', adminController.getUsersByType);
+router.post('/admin/sendNotificationByType', sendNotificationByType);
+
 router.get('/getDashboardData', adminController.getDashboardData);
 router.get('/getOrders', adminController.getOrders);
 
