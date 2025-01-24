@@ -639,7 +639,7 @@ exports.register_pharmacy = async (req, res) => {
 
 exports.hbot_order = async (req, res) => {
   try {
-    const { fullname, sessionPlan,amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const { fullname, sessionPlan, amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
     await order.create({
       user_id: req.user.userId,
@@ -702,9 +702,9 @@ exports.yoga_order = async (req, res) => {
 
 exports.lab_order = async (req, res) => {
   try {
-    const { lab_id, test_id, fullname,amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const { lab_id, test_id, fullname, amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
-    await order.create({
+    var order = await order.create({
       lab_id,
       test_id,
       user_id: req.user.userId,
@@ -734,17 +734,7 @@ exports.lab_order = async (req, res) => {
     console.log([playerId])
     const notificationMessage = `New Lab Appointment: ${fullname} has booked an appointment.`;
     const notificationTitle = "Lab Appointment Notification";
-    const notificationData = {
-      fullname,
-      phone_number,
-      address,
-      city,
-      state,
-      zip_code,
-      date,
-      start_time,
-      end_time,
-    };
+    const notificationData = order;
 
     sendNotification([playerId], notificationMessage, notificationTitle, notificationData);
 
@@ -876,8 +866,8 @@ const sendNotification = (playerIds, message, title, dataItem) => {
     headings: { en: title },
     data: dataItem,
     include_player_ids: playerIds,
-    url: "https://example.com/lab-appointment-details", // Replace with the actual URL
-    image: "https://example.com/logo.png", // Replace with your logo URL
+    // url: "https://example.com/lab-appointment-details", // Replace with the actual URL
+    // image: "https://example.com/logo.png", // Replace with your logo URL
   };
 
   const options = {
