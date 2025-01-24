@@ -704,7 +704,7 @@ exports.lab_order = async (req, res) => {
   try {
     const { lab_id, test_id, fullname, amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
     // console.log(req.user)
-    var order = await order.create({
+    var lab_order = await order.create({
       lab_id,
       test_id,
       user_id: req.user.userId,
@@ -734,7 +734,7 @@ exports.lab_order = async (req, res) => {
     console.log([playerId])
     const notificationMessage = `New Lab Appointment: ${fullname} has booked an appointment.`;
     const notificationTitle = "Lab Appointment Notification";
-    const notificationData = order;
+    const notificationData = lab_order;
 
     sendNotification([playerId], notificationMessage, notificationTitle, notificationData);
 
