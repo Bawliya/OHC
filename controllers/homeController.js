@@ -17,8 +17,8 @@ exports.getHomePageData = async (req, res) => {
     const categories = await Category.find();
 
     // Fetch service and testimonial videos
-    const service = await Video.find({ video_type: "service" }).limit(4);
-    const testimonial = await Video.find({ video_type: "testimonial" }).limit(4);
+    const service = await Video.find({ video_type: "service" });
+    const testimonial = await Video.find({ video_type: "testimonial" });
 
     // Return the data
     res.status(200).json({
@@ -84,12 +84,12 @@ exports.getYoga = async (req, res) => {
       message: "Yoga data fetched successfully",
       data: yogaEntry
         ? {
-            ...yogaEntry,
-            status: yogaStatus,
-            purchase,
-            yogaType,
-            video
-          }
+          ...yogaEntry,
+          status: yogaStatus,
+          purchase,
+          yogaType,
+          video
+        }
         : null,
     });
   } catch (err) {
@@ -143,7 +143,7 @@ exports.getPharmacy = async (req, res) => {
 
     // Aggregation to check if a chat exists between the user and each pharmacy
     const pharmaciesWithChatStatus = await userModel.aggregate([
-      { 
+      {
         $match: { userType: "Pharmacy Clinic" }  // Match pharmacies
       },
       {
@@ -151,8 +151,9 @@ exports.getPharmacy = async (req, res) => {
           from: 'chats',  // Chats collection
           let: { pharmacyId: "$_id" },  // Pharmacy ID to join
           pipeline: [
-            { $match: { 
-                $expr: { 
+            {
+              $match: {
+                $expr: {
                   $or: [
                     { $and: [{ $eq: ["$from", userId] }, { $eq: ["$to", "$$pharmacyId"] }] },
                     { $and: [{ $eq: ["$to", userId] }, { $eq: ["$from", "$$pharmacyId"] }] }
@@ -188,74 +189,74 @@ exports.getPharmacy = async (req, res) => {
 };
 
 
-  exports.searchByCityAndType = async (req, res) => {
-    try {
-      // Extract query parameters
-      const { type, city } = req.body;
-  
-      // Validate query parameters
-      if (!type || !city) {
-        return res.status(400).json({
-          status: false,
-          message: 'Type and City parameters are required',
-        });
-      }
-  
-      // Fetch data based on userType and city
-      const data = await userModel.find({
-        userType: type,
-        city: { $regex: new RegExp(city, 'i') }, // Case-insensitive search for city
-      });
-  
-      // Return the result
-      res.status(200).json({
-        status: true,
-        message: 'Search results fetched successfully',
-        data,
-      });
-    } catch (err) {
-      res.status(500).json({
-        status: false,
-        message: 'Failed to fetch search results',
-        error: err.message,
-      });
-    }
-  };
+exports.searchByCityAndType = async (req, res) => {
+  try {
+    // Extract query parameters
+    const { type, city } = req.body;
 
-  exports.getService = async (req, res) => {
-    try {
-      const service = await Video.find({video_type:"service"});
-  
-      // Return the data
-      res.status(200).json({
-        status: true,
-        message: 'Service data fetched successfully',
-        data: service,
-      });
-    } catch (err) {
-      res.status(500).json({
+    // Validate query parameters
+    if (!type || !city) {
+      return res.status(400).json({
         status: false,
-        message: 'Failed to fetch Service data',
-        error: err.message,
+        message: 'Type and City parameters are required',
       });
     }
-  };
-  exports.getTestmonial = async (req, res) => {
-    try {
-      const testmonial = await Video.find({video_type:"testmonial"});
-  
-      // Return the data
-      res.status(200).json({
-        status: true,
-        message: 'Testmonial data fetched successfully',
-        data: testmonial,
-      });
-    } catch (err) {
-      res.status(500).json({
-        status: false,
-        message: 'Failed to fetch Testmonial data',
-        error: err.message,
-      });
-    }
-  };
-  
+
+    // Fetch data based on userType and city
+    const data = await userModel.find({
+      userType: type,
+      city: { $regex: new RegExp(city, 'i') }, // Case-insensitive search for city
+    });
+
+    // Return the result
+    res.status(200).json({
+      status: true,
+      message: 'Search results fetched successfully',
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to fetch search results',
+      error: err.message,
+    });
+  }
+};
+
+exports.getService = async (req, res) => {
+  try {
+    const service = await Video.find({ video_type: "service" });
+
+    // Return the data
+    res.status(200).json({
+      status: true,
+      message: 'Service data fetched successfully',
+      data: service,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to fetch Service data',
+      error: err.message,
+    });
+  }
+};
+exports.getTestmonial = async (req, res) => {
+  try {
+    const testmonial = await Video.find({ video_type: "testmonial" });
+
+    // Return the data
+    res.status(200).json({
+      status: true,
+      message: 'Testmonial data fetched successfully',
+      data: testmonial,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to fetch Testmonial data',
+      error: err.message,
+    });
+  }
+};
+
