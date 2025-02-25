@@ -18,7 +18,7 @@ exports.getHomePageData = async (req, res) => {
 
     // Fetch service and testimonial videos
     const service = await Video.find({ video_type: "service" });
-    const testimonial = await Video.find({ video_type: "testimonial" });
+    const testimonial = await Video.find({ video_type: "testmonial" });
 
     // Return the data
     res.status(200).json({
