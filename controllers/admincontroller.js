@@ -305,7 +305,7 @@ exports.getOrders = async (req, res) => {
       matchStage.type = type;
     }
     if (labId) {
-      matchStage.lab_id = labId;
+      matchStage.lab_id = new mongoose.Types.ObjectId(labId);
     }
 
     if (payment_status) {
