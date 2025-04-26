@@ -53,16 +53,13 @@ const orderSchema = new mongoose.Schema(
     amount: {
       type: Number,
     },
-    start_time: {
-      type: String,
-    },
     sessionPlan: {
       type: String,
     },
     yogaType: {
       type: String,
     },
-    end_time: {
+    time: {
       type: String,
     },
   },

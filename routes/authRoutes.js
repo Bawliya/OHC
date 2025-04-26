@@ -39,6 +39,7 @@ router.post('/updatePasswordWithOldPassword', auth, updatePasswordWithOldPasswor
 
 // Home Page API
 router.post('/hbot_order', auth, hbot_order);
+router.post('/hbot_order_Slot', auth, hbot_order_Slot);
 router.post('/lab_order', auth, lab_order);
 router.post('/yoga_order', auth, yoga_order);
 router.post('/phys_order', auth, phys_order);

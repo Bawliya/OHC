@@ -1,25 +1,26 @@
-const User = require('../models/userModel');
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const multer = require('multer');
-const path = require('path');
-const { use } = require('../routes/authRoutes');
-const labtest = require('../models/labtest');
-const Notification = require('../models/notification');
-const order = require('../models/order');
+const User = require("../models/userModel");
+const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const multer = require("multer");
+const path = require("path");
+const { use } = require("../routes/authRoutes");
+const labtest = require("../models/labtest");
+const Notification = require("../models/notification");
+const order = require("../models/order");
 const jwtsecret = "ohcappapijwt";
 const mongoose = require("mongoose");
-const OneSignal = require('onesignal-node');
-const https = require('https');
-const oneSignalClient = new OneSignal.Client('41e4de85-be9f-4f97-8458-c3278921f967', 'os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq');
-
-
+const OneSignal = require("onesignal-node");
+const https = require("https");
+const oneSignalClient = new OneSignal.Client(
+  "41e4de85-be9f-4f97-8458-c3278921f967",
+  "os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq"
+);
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/images'); // Directory to store images
+    cb(null, "uploads/images"); // Directory to store images
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}_${file.originalname}`);
@@ -30,22 +31,23 @@ const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png/;
-    const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const extName = fileTypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
     const mimeType = fileTypes.test(file.mimetype);
 
     if (extName && mimeType) {
       cb(null, true);
     } else {
-      cb(new Error('Only .jpeg, .jpg, and .png file types are allowed!'));
+      cb(new Error("Only .jpeg, .jpg, and .png file types are allowed!"));
     }
   },
-}).single('image'); // 'profileImage' should match the key in the request form-data
-
+}).single("image"); // 'profileImage' should match the key in the request form-data
 
 const sendOTP = async (email) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.EMAIL,
       pass: process.env.EMAIL_PASS,
@@ -55,7 +57,7 @@ const sendOTP = async (email) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: 'Your OTP Code',
+    subject: "Your OTP Code",
     text: `Your OTP is ${otp}`,
   };
 
@@ -70,7 +72,7 @@ exports.login = async (req, res) => {
     // Validate input
     if (!email || !password) {
       return res.status(400).json({
-        message: 'Email and password are required',
+        message: "Email and password are required",
         status: false,
       });
     }
@@ -80,44 +82,42 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: 'User not found',
+        message: "User not found",
         status: false,
       });
     }
 
     if (user.verify == false) {
       return res.status(400).json({
-        message: 'Please verify your email register again',
-        status: false
-      })
+        message: "Please verify your email register again",
+        status: false,
+      });
     }
 
     // Verify the password using bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid password',
+        message: "Invalid password",
         status: false,
       });
     }
 
     // Generate a JWT token
-    const token = jwt.sign(
-      { email: user.email, userId: user._id },
-      jwtsecret,
-      { expiresIn: '1y' }
-    );
+    const token = jwt.sign({ email: user.email, userId: user._id }, jwtsecret, {
+      expiresIn: "1y",
+    });
 
     return res.status(200).json({
-      message: 'Login successful',
+      message: "Login successful",
       status: true,
       token,
-      data: user
+      data: user,
     });
   } catch (error) {
-    console.error('Error during login:', error);
+    console.error("Error during login:", error);
     res.status(500).json({
-      message: 'Error during login',
+      message: "Error during login",
       status: false,
     });
   }
@@ -130,7 +130,7 @@ exports.verifyOtp = async (req, res) => {
     // Validate the input
     if (!email || !otp) {
       return res.status(400).json({
-        message: 'Email and OTP are required',
+        message: "Email and OTP are required",
         status: false,
       });
     }
@@ -140,7 +140,7 @@ exports.verifyOtp = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: 'User not found',
+        message: "User not found",
         status: false,
       });
     }
@@ -148,7 +148,7 @@ exports.verifyOtp = async (req, res) => {
     // Check if the provided OTP matches the user's OTP
     if (user.otp !== otp) {
       return res.status(400).json({
-        message: 'Invalid OTP',
+        message: "Invalid OTP",
         status: false,
       });
     }
@@ -159,22 +159,20 @@ exports.verifyOtp = async (req, res) => {
     await user.save();
 
     // Generate a JWT token
-    const token = jwt.sign(
-      { email: user.email, userId: user._id },
-      jwtsecret,
-      { expiresIn: '1y' }
-    );
+    const token = jwt.sign({ email: user.email, userId: user._id }, jwtsecret, {
+      expiresIn: "1y",
+    });
 
     res.status(200).json({
-      message: 'OTP verified successfully',
+      message: "OTP verified successfully",
       status: true,
       token,
-      data: user
+      data: user,
     });
   } catch (error) {
-    console.error('Error verifying OTP:', error);
+    console.error("Error verifying OTP:", error);
     res.status(500).json({
-      message: 'Error verifying OTP',
+      message: "Error verifying OTP",
       status: false,
     });
   }
@@ -188,7 +186,7 @@ exports.updatePasswordWithOldPassword = async (req, res) => {
     // Validate input
     if (!oldPassword || !newPassword) {
       return res.status(400).json({
-        message: 'Old password and new password are required',
+        message: "Old password and new password are required",
         status: false,
       });
     }
@@ -197,7 +195,7 @@ exports.updatePasswordWithOldPassword = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
-        message: 'User not found',
+        message: "User not found",
         status: false,
       });
     }
@@ -206,7 +204,7 @@ exports.updatePasswordWithOldPassword = async (req, res) => {
     const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isOldPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid old password',
+        message: "Invalid old password",
         status: false,
       });
     }
@@ -217,18 +215,17 @@ exports.updatePasswordWithOldPassword = async (req, res) => {
     await user.save(); // Save the updated user document
 
     return res.status(200).json({
-      message: 'Password updated successfully',
+      message: "Password updated successfully",
       status: true,
     });
   } catch (error) {
-    console.error('Error updating password:', error);
+    console.error("Error updating password:", error);
     return res.status(500).json({
-      message: 'Error updating password',
+      message: "Error updating password",
       status: false,
     });
   }
 };
-
 
 exports.updatePassword = async (req, res) => {
   try {
@@ -238,7 +235,7 @@ exports.updatePassword = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
     if (!user) {
       return res.status(404).json({
-        message: 'User not found',
+        message: "User not found",
         status: false,
       });
     }
@@ -247,17 +244,17 @@ exports.updatePassword = async (req, res) => {
     user.password = hashedPassword;
     user.save();
     res.status(200).json({
-      message: 'Password updated successfully',
+      message: "Password updated successfully",
       status: true,
     });
   } catch (error) {
-    console.error('Error updating password:', error);
+    console.error("Error updating password:", error);
     res.status(500).json({
-      message: 'Error updating password',
+      message: "Error updating password",
       status: false,
     });
   }
-}
+};
 
 exports.update_device_id = async (req, res) => {
   try {
@@ -267,7 +264,7 @@ exports.update_device_id = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
     if (!user) {
       return res.status(404).json({
-        message: 'User not found',
+        message: "User not found",
         status: false,
       });
     }
@@ -275,17 +272,17 @@ exports.update_device_id = async (req, res) => {
     user.device_id = device_id;
     user.save();
     res.status(200).json({
-      message: 'device_id updated successfully',
+      message: "device_id updated successfully",
       status: true,
     });
   } catch (error) {
-    console.error('Error updating password:', error);
+    console.error("Error updating password:", error);
     res.status(500).json({
-      message: 'Error updating password',
+      message: "Error updating password",
       status: false,
     });
   }
-}
+};
 
 exports.otpSend = async (req, res) => {
   try {
@@ -294,7 +291,7 @@ exports.otpSend = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({
-        message: 'User not found',
+        message: "User not found",
         status: false,
       });
     }
@@ -302,18 +299,15 @@ exports.otpSend = async (req, res) => {
     user.save();
     return res
       .status(200)
-      .json({ message: 'OTP sent to your email', status: true });
-
+      .json({ message: "OTP sent to your email", status: true });
   } catch (error) {
-    console.error('Error updating password:', error);
+    console.error("Error updating password:", error);
     res.status(500).json({
-      message: 'Error updating password',
+      message: "Error updating password",
       status: false,
     });
   }
-}
-
-
+};
 
 exports.register = async (req, res) => {
   const {
@@ -340,7 +334,7 @@ exports.register = async (req, res) => {
       if (existingUser.verify) {
         return res
           .status(400)
-          .json({ message: 'Email already exists', status: false });
+          .json({ message: "Email already exists", status: false });
       }
       const hashedPassword = await bcrypt.hash(password, 12);
       // If the user exists but is not verified, update their details and resend OTP
@@ -358,7 +352,7 @@ exports.register = async (req, res) => {
             state,
             zipCode,
             userType,
-            password: hashedPassword
+            password: hashedPassword,
           },
         },
         { new: true } // Ensure the updated document is returned
@@ -366,7 +360,7 @@ exports.register = async (req, res) => {
 
       return res
         .status(200)
-        .json({ message: 'OTP sent to your email', status: true });
+        .json({ message: "OTP sent to your email", status: true });
     }
 
     // If the user does not exist, create a new user
@@ -390,17 +384,16 @@ exports.register = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: 'OTP sent to your email', status: true });
+      .json({ message: "OTP sent to your email", status: true });
   } catch (error) {
-    console.error('Error during registration:', error);
+    console.error("Error during registration:", error);
     return res
       .status(500)
-      .json({ message: 'Error registering user', status: false });
+      .json({ message: "Error registering user", status: false });
   }
 };
 
 exports.register_lab = async (req, res) => {
-
   upload(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ message: err.message, status: false });
@@ -419,7 +412,7 @@ exports.register_lab = async (req, res) => {
       password,
       userType,
       about_desc,
-      tests
+      tests,
     } = req.body;
     var otp = 1234;
 
@@ -436,7 +429,7 @@ exports.register_lab = async (req, res) => {
         if (existingUser.verify) {
           return res
             .status(400)
-            .json({ message: 'Email already exists', status: false });
+            .json({ message: "Email already exists", status: false });
         }
         // If the user exists but is not verified, update their details and resend OTP
         await User.findOneAndUpdate(
@@ -455,7 +448,7 @@ exports.register_lab = async (req, res) => {
               about_desc,
               password: hashedPassword,
               image,
-              otp
+              otp,
             },
           },
           { new: true } // Ensure the updated document is returned
@@ -471,20 +464,16 @@ exports.register_lab = async (req, res) => {
               var lab = new labtest({
                 lab_id: existingUser._id,
                 name: tests_list[i].name,
-                price: tests_list[i].price
+                price: tests_list[i].price,
               });
               await lab.save();
-
             }
-
           }
         }
 
-
-
         return res
           .status(200)
-          .json({ message: 'OTP sent to your email', status: true });
+          .json({ message: "OTP sent to your email", status: true });
       }
 
       // If the user does not exist, create a new user
@@ -503,7 +492,7 @@ exports.register_lab = async (req, res) => {
         userType,
         about_desc,
         image,
-        otp
+        otp,
       });
 
       var user = await newUser.save();
@@ -515,26 +504,23 @@ exports.register_lab = async (req, res) => {
             var lab = new labtest({
               lab_id: newUser._id,
               name: tests_list[i].name,
-              price: tests_list[i].price
+              price: tests_list[i].price,
             });
             await lab.save();
-
           }
-
         }
       }
       return res
         .status(200)
-        .json({ message: 'OTP sent to your email', status: true });
+        .json({ message: "OTP sent to your email", status: true });
     } catch (error) {
-      console.error('Error during registration:', error);
+      console.error("Error during registration:", error);
       return res
         .status(500)
-        .json({ message: 'Error registering user', status: false });
+        .json({ message: "Error registering user", status: false });
     }
   });
 };
-
 
 exports.register_pharmacy = async (req, res) => {
   upload(req, res, async (err) => {
@@ -568,7 +554,7 @@ exports.register_pharmacy = async (req, res) => {
         if (existingUser.verify) {
           return res
             .status(400)
-            .json({ message: 'Email already exists', status: false });
+            .json({ message: "Email already exists", status: false });
         }
 
         const hashedPassword = await bcrypt.hash(password, 12);
@@ -591,7 +577,7 @@ exports.register_pharmacy = async (req, res) => {
               userType,
               password: hashedPassword,
               image,
-              otp
+              otp,
             },
           },
           { new: true }
@@ -599,7 +585,7 @@ exports.register_pharmacy = async (req, res) => {
 
         return res
           .status(200)
-          .json({ message: 'OTP sent to your email', status: true });
+          .json({ message: "OTP sent to your email", status: true });
       }
 
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -620,27 +606,37 @@ exports.register_pharmacy = async (req, res) => {
         userType,
         password: hashedPassword,
         image,
-        otp
+        otp,
       });
 
       await newUser.save();
 
       return res
         .status(200)
-        .json({ message: 'OTP sent to your email', status: true });
+        .json({ message: "OTP sent to your email", status: true });
     } catch (error) {
-      console.error('Error during registration:', error);
+      console.error("Error during registration:", error);
       return res
         .status(500)
-        .json({ message: 'Error registering user', status: false });
+        .json({ message: "Error registering user", status: false });
     }
   });
 };
 
 exports.hbot_order = async (req, res) => {
   try {
-    const { fullname, sessionPlan, amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
-    // console.log(req.user)
+    const {
+      fullname,
+      sessionPlan,
+      amount,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date,
+      time,
+    } = req.body;
     await order.create({
       user_id: req.user.userId,
       type: "HBOT",
@@ -653,27 +649,58 @@ exports.hbot_order = async (req, res) => {
       state,
       zip_code,
       date: new Date(date),
-      start_time,
-      end_time
+      time,
     });
     return res.status(200).json({
-      message: 'Appointment Submit successfull',
+      message: "Appointment Submit successfull",
       status: true,
     });
-
-
   } catch (error) {
-    console.error('Error Submitting HBOT appointment:', error);
+    console.error("Error Submitting HBOT appointment:", error);
     res.status(500).json({
-      message: 'Something went wrong',
+      message: "Something went wrong",
       status: false,
     });
   }
-}
+};
+
+exports.hbot_order_Slot = async (req, res) => {
+  try {
+    const { date, time } = req.body;
+    const obj = {
+      type: "HBOT",
+      date: new Date(date),
+      time: time,
+    };
+    const count = await order.countDocuments(obj);
+    return res.status(200).json({
+      message: "hbot Slot Get successfuly",
+      status: true,
+      data: count,
+    });
+  } catch (error) {
+    console.error("Error Submitting HBOT appointment:", error);
+    res.status(500).json({
+      message: "Something went wrong",
+      status: false,
+    });
+  }
+};
 
 exports.yoga_order = async (req, res) => {
   try {
-    const { fullname, phone_number, address, city, state, zip_code, date, start_time, end_time, yogaType } = req.body;
+    const {
+      fullname,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date,
+      start_time,
+      end_time,
+      yogaType,
+    } = req.body;
     // console.log(req.user)
     await order.create({
       user_id: req.user.userId,
@@ -683,26 +710,38 @@ exports.yoga_order = async (req, res) => {
       address,
       city,
       state,
-      zip_code, date, start_time, end_time, yogaType
+      zip_code,
+      date,
+      start_time,
+      end_time,
+      yogaType,
     });
     return res.status(200).json({
-      message: 'Query Submit successfull',
+      message: "Query Submit successfull",
       status: true,
     });
-
-
   } catch (error) {
-    console.error('Error Submitting HBOT appointment:', error);
+    console.error("Error Submitting HBOT appointment:", error);
     res.status(500).json({
-      message: 'Something went wrong',
+      message: "Something went wrong",
       status: false,
     });
   }
-}
+};
 
 exports.phys_order = async (req, res) => {
   try {
-    const { fullname, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const {
+      fullname,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date,
+      start_time,
+      end_time,
+    } = req.body;
     // console.log(req.user)
     await order.create({
       user_id: req.user.userId,
@@ -712,26 +751,40 @@ exports.phys_order = async (req, res) => {
       address,
       city,
       state,
-      zip_code, date, start_time, end_time
+      zip_code,
+      date,
+      start_time,
+      end_time,
     });
     return res.status(200).json({
-      message: 'Query Submit successfull',
+      message: "Query Submit successfull",
       status: true,
     });
-
-
   } catch (error) {
-    console.error('Error Submitting HBOT appointment:', error);
+    console.error("Error Submitting HBOT appointment:", error);
     res.status(500).json({
-      message: 'Something went wrong',
+      message: "Something went wrong",
       status: false,
     });
   }
-}
+};
 
 exports.lab_order = async (req, res) => {
   try {
-    const { lab_id, test_id, fullname, amount, phone_number, address, city, state, zip_code, date, start_time, end_time } = req.body;
+    const {
+      lab_id,
+      test_id,
+      fullname,
+      amount,
+      phone_number,
+      address,
+      city,
+      state,
+      zip_code,
+      date,
+      start_time,
+      end_time,
+    } = req.body;
     // console.log(req.user)
     var lab_order = await order.create({
       lab_id,
@@ -747,49 +800,52 @@ exports.lab_order = async (req, res) => {
       zip_code,
       date: new Date(date),
       start_time,
-      end_time
+      end_time,
     });
     // Fetch the lab's player ID (device_id) from the User table
     const labUser = await User.findById({ _id: lab_id });
 
     if (!labUser || !labUser.device_id) {
       return res.status(404).json({
-        message: 'Lab user not found or device_id missing',
+        message: "Lab user not found or device_id missing",
         status: false,
       });
     }
 
     const playerId = labUser.device_id; // Player ID for the lab's device
-    console.log([playerId])
+    console.log([playerId]);
     const notificationMessage = `New Lab Appointment: ${fullname} has booked an appointment.`;
     const notificationTitle = "Lab Appointment Notification";
     const notificationData = lab_order;
 
-    sendNotification([playerId], notificationMessage, notificationTitle, notificationData);
+    sendNotification(
+      [playerId],
+      notificationMessage,
+      notificationTitle,
+      notificationData
+    );
 
     var noti = new Notification({
       title: notificationTitle,
       message: notificationMessage,
       from: req.user.userId,
       to: lab_id,
-      type: "lab_order"
-    })
+      type: "lab_order",
+    });
     await noti.save();
 
     return res.status(200).json({
-      message: 'Lab Appointment Submit successfull',
+      message: "Lab Appointment Submit successfull",
       status: true,
     });
-
-
   } catch (error) {
-    console.error('Error Submitting HBOT appointment:', error);
+    console.error("Error Submitting HBOT appointment:", error);
     res.status(500).json({
-      message: 'Something went wrong',
+      message: "Something went wrong",
       status: false,
     });
   }
-}
+};
 
 exports.sendNotificationByType = async (req, res) => {
   try {
@@ -804,9 +860,9 @@ exports.sendNotificationByType = async (req, res) => {
     }
 
     if (userType == "All") {
-      var obj = { device_id: { $exists: true, $ne: null } }
+      var obj = { device_id: { $exists: true, $ne: null } };
     } else {
-      var obj = { userType, device_id: { $exists: true, $ne: null } }
+      var obj = { userType, device_id: { $exists: true, $ne: null } };
     }
 
     // Find users of the given type with a valid player_id
@@ -820,7 +876,7 @@ exports.sendNotificationByType = async (req, res) => {
     }
 
     // Extract player IDs
-    const playerIds = users.map(user => user.device_id);
+    const playerIds = users.map((user) => user.device_id);
 
     // Send notification
     const dataItem = { userType }; // Add any additional data you want to include
@@ -830,8 +886,8 @@ exports.sendNotificationByType = async (req, res) => {
       type: userType,
       message: message,
       title: title,
-      noti_type: "admin"
-    })
+      noti_type: "admin",
+    });
 
     await noti.save();
 
@@ -882,12 +938,11 @@ exports.getNotification = async (req, res) => {
   }
 };
 
-
-
 const sendNotification = (playerIds, message, title, dataItem) => {
-  console.log(playerIds)
+  console.log(playerIds);
   const app_id = "41e4de85-be9f-4f97-8458-c3278921f967";
-  const apiKey = "os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq";
+  const apiKey =
+    "os_v2_app_ihsn5bn6t5hzpbcyymtysipzm5dqlpwrl4uuf6n3zn2qslnfkli4m73joqfp4azuq7y2wmwyn36s4qqoc246iwpdv4uqapmisekzshq";
 
   const notification = {
     app_id: app_id,
@@ -906,17 +961,17 @@ const sendNotification = (playerIds, message, title, dataItem) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Authorization": `Basic ${apiKey}`
-    }
+      Authorization: `Basic ${apiKey}`,
+    },
   };
 
   const req = https.request(options, (res) => {
-    res.on('data', (data) => {
+    res.on("data", (data) => {
       console.log("Notification Response:", JSON.parse(data.toString()));
     });
   });
 
-  req.on('error', (e) => {
+  req.on("error", (e) => {
     console.error("Notification Error:", e);
   });
 
@@ -927,13 +982,11 @@ const sendNotification = (playerIds, message, title, dataItem) => {
 exports.get_booked_appoinment = async (req, res) => {
   try {
     if (req.body.type === "LAB") {
-
-
       const bookedAppointments = await order.aggregate([
         {
           $match: {
             type: req.body.type,
-            user_id: new mongoose.Types.ObjectId(req.user.userId)
+            user_id: new mongoose.Types.ObjectId(req.user.userId),
           }, // Filter orders based on user_id and type
         },
         {
@@ -967,7 +1020,7 @@ exports.get_booked_appoinment = async (req, res) => {
           },
         },
         {
-          $unwind: "$lab_details"
+          $unwind: "$lab_details",
         },
         {
           $project: {
@@ -1001,7 +1054,10 @@ exports.get_booked_appoinment = async (req, res) => {
         data: bookedAppointments,
       });
     } else {
-      const bookedAppointments = await order.find({ type: req.body.type, user_id: req.user.userId });
+      const bookedAppointments = await order.find({
+        type: req.body.type,
+        user_id: req.user.userId,
+      });
 
       return res.status(200).json({
         message: "HBOT Appointment fetched successfully",
@@ -1019,8 +1075,10 @@ exports.get_booked_appoinment = async (req, res) => {
 };
 exports.get_lab_order = async (req, res) => {
   try {
-    console.log(req.user.userId)
-    const matchCondition = { lab_id: new mongoose.Types.ObjectId(req.user.userId) };
+    console.log(req.user.userId);
+    const matchCondition = {
+      lab_id: new mongoose.Types.ObjectId(req.user.userId),
+    };
 
     const bookedAppointments = await order.aggregate([
       {
@@ -1057,7 +1115,7 @@ exports.get_lab_order = async (req, res) => {
         },
       },
       {
-        $unwind: "$user_details"
+        $unwind: "$user_details",
       },
       {
         $project: {
@@ -1083,7 +1141,7 @@ exports.get_lab_order = async (req, res) => {
             phoneNumber: 1,
             address: 1,
             city: 1,
-            state: 1
+            state: 1,
           },
         },
       },
@@ -1094,7 +1152,6 @@ exports.get_lab_order = async (req, res) => {
       status: true,
       data: bookedAppointments,
     });
-
   } catch (error) {
     console.error("Error fetching lab appointments:", error);
     res.status(500).json({
@@ -1103,6 +1160,3 @@ exports.get_lab_order = async (req, res) => {
     });
   }
 };
-
-
-
