@@ -296,13 +296,16 @@ exports.uploadReport = async(req,res)=>{
 
 exports.getOrders = async (req, res) => {
   try {
-    const { type, payment_status, start_date, end_date } = req.query;
+    const { type, payment_status, start_date, end_date,labId } = req.query;
 
     // Build match conditions
     let matchStage = {};
 
     if (type && type !== "All") {
       matchStage.type = type;
+    }
+    if (labId) {
+      matchStage.lab_id = labId;
     }
 
     if (payment_status) {
