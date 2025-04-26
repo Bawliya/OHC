@@ -310,7 +310,7 @@ exports.getOrders = async (req, res) => {
       },
       {
         $addFields: {
-          labName: '$labInfo.name', // labInfo se sirf name pick karo
+          labName: '$labInfo.fullName', // labInfo se sirf name pick karo
           labEmail: '$labInfo.email'  // labInfo se sirf name pick karo
         }
       },
