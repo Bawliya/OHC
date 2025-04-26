@@ -218,40 +218,110 @@ exports.getDashboardData = async (req, res) => {
   }
 };
 
+// exports.getOrders = async (req, res) => {
+//   try {
+//     const { type, payment_status, start_date, end_date } = req.query;
+
+//     // Build the query object
+//     let query = {};
+
+//     // Filter by type if provided
+//     if (type) {
+//       if(type != "All"){
+//         query.type = type;
+//       }
+//     }
+
+//     // Filter by payment status if provided
+//     if (payment_status) {
+//       query.payment_status = payment_status.toLowerCase();
+//     }
+
+//     // Filter by date range if provided
+//     if (start_date || end_date) {
+//       query.date = {};
+//       if (start_date) {
+//         query.date.$gte = new Date(start_date);
+//       }
+//       if (end_date) {
+//         query.date.$lte = new Date(end_date);
+//       }
+//     }
+
+//     // Fetch the filtered data
+//     const data = await order.find(query);
+
+//     // Respond with the results
+//     res.status(200).json({
+//       status: true,
+//       message: "Orders retrieved successfully",
+//       data,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       status: false,
+//       message: "Failed to retrieve orders",
+//       error: err.message,
+//     });
+//   }
+// };
+
 exports.getOrders = async (req, res) => {
   try {
     const { type, payment_status, start_date, end_date } = req.query;
 
-    // Build the query object
-    let query = {};
+    // Build match conditions
+    let matchStage = {};
 
-    // Filter by type if provided
-    if (type) {
-      if(type != "All"){
-        query.type = type;
-      }
+    if (type && type !== "All") {
+      matchStage.type = type;
     }
 
-    // Filter by payment status if provided
     if (payment_status) {
-      query.payment_status = payment_status.toLowerCase();
+      matchStage.payment_status = payment_status.toLowerCase();
     }
 
-    // Filter by date range if provided
     if (start_date || end_date) {
-      query.date = {};
+      matchStage.date = {};
       if (start_date) {
-        query.date.$gte = new Date(start_date);
+        matchStage.date.$gte = new Date(start_date);
       }
       if (end_date) {
-        query.date.$lte = new Date(end_date);
+        matchStage.date.$lte = new Date(end_date);
       }
     }
 
-    // Fetch the filtered data
-    const data = await order.find(query);
+    // Aggregation pipeline
+    const pipeline = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: 'labtests',       // collection name in MongoDB
+          localField: 'labId',     // field in orders
+          foreignField: '_id',     // field in labtests
+          as: 'labInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$labInfo',
+          preserveNullAndEmptyArrays: true   // agar labInfo naa ho to bhi record aaye
+        }
+      },
+      {
+        $addFields: {
+          labName: '$labInfo.name'  // labInfo se sirf name pick karo
+        }
+      },
+      {
+        $project: {
+          labInfo: 0  // labInfo hata do result se
+        }
+      }
+    ];
 
-    // Respond with the results
+    const data = await order.aggregate(pipeline);
+
     res.status(200).json({
       status: true,
       message: "Orders retrieved successfully",
