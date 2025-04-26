@@ -1039,6 +1039,7 @@ exports.get_booked_appoinment = async (req, res) => {
             end_time: 1,
             createdAt: 1,
             updatedAt: 1,
+            time: 1,
             test_details: "$test_details",
             lab_details: {
               _id: 1,
@@ -1132,6 +1133,8 @@ exports.get_lab_order = async (req, res) => {
           date: 1,
           start_time: 1,
           end_time: 1,
+          image: 1,
+          docType: 1,
           createdAt: 1,
           updatedAt: 1,
           test_details: "$test_details",
