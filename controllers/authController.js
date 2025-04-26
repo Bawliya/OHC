@@ -1038,6 +1038,8 @@ exports.get_booked_appoinment = async (req, res) => {
             start_time: 1,
             end_time: 1,
             createdAt: 1,
+            image: 1,
+            docType: 1,
             updatedAt: 1,
             time: 1,
             test_details: "$test_details",
