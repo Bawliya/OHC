@@ -296,7 +296,7 @@ exports.getOrders = async (req, res) => {
       { $match: matchStage },
       {
         $lookup: {
-          from: 'labtests',       // collection name in MongoDB
+          from: 'users',       // collection name in MongoDB
           localField: 'lab_id',     // field in orders
           foreignField: '_id',     // field in labtests
           as: 'labInfo'
