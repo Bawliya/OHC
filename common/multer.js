@@ -35,6 +35,8 @@ const storage = multer.diskStorage({
       cb(null, "uploads/video"); // Video files folder
     } else if (file.fieldname === "image") {
       cb(null, "uploads/image"); // Image files folder
+    } else if (file.fieldname === "report") {
+      cb(null, "uploads/report"); // Report files folder
     }
   },
   filename: (req, file, cb) => {
@@ -46,10 +48,14 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   const allowedVideoTypes = ["video/mp4", "video/mkv", "video/avi"];
   const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+  const allowedReportTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
 
   if (file.fieldname === "video" && allowedVideoTypes.includes(file.mimetype)) {
     cb(null, true);
   } else if (file.fieldname === "image" && allowedImageTypes.includes(file.mimetype)) {
+    cb(null, true);
+  }
+  else if (file.fieldname === "report" && allowedReportTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error("Invalid file type!"), false);

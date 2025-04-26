@@ -62,6 +62,12 @@ const orderSchema = new mongoose.Schema(
     time: {
       type: String,
     },
+    image: {
+      type: String,
+    },
+    docType: {
+      type: String,
+    },
   },
   {
     timestamps: true,

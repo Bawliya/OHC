@@ -105,5 +105,7 @@ router.get("/videoget", getAllVideos);
 router.get("/videoupdate/:id", getVideoById);
 router.delete("/videodelete/:id", deleteVideo);
 
+router.post('/report', upload.single('report'), adminController.uploadReport);
+
 
 module.exports = router; 

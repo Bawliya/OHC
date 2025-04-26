@@ -218,6 +218,34 @@ exports.getDashboardData = async (req, res) => {
   }
 };
 
+exports.uploadReport = async(req,res)=>{
+ try{
+  const {orderId} = req.body 
+  if(!req.file.filename){
+    res.status(400).json({
+      status: false,
+      message: 'image not found',
+      error: err.message,
+    });
+  }
+  const obj ={
+    image :req.file.filename,
+    docType:req.file.mimetype
+  }
+  await order.updateOne({_id:orderId},obj)
+  res.status(200).json({
+    status: true,
+    message: "Report upload success",
+  });
+ }catch (err) {
+  res.status(500).json({
+    status: false,
+    message: "Failed to retrieve orders",
+    error: err.message,
+  });
+}
+}
+
 // exports.getOrders = async (req, res) => {
 //   try {
 //     const { type, payment_status, start_date, end_date } = req.query;
