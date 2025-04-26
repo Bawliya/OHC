@@ -310,7 +310,8 @@ exports.getOrders = async (req, res) => {
       },
       {
         $addFields: {
-          labName: '$labInfo.name'  // labInfo se sirf name pick karo
+          labName: '$labInfo.name', // labInfo se sirf name pick karo
+          labEmail: '$labInfo.email'  // labInfo se sirf name pick karo
         }
       },
       {
@@ -324,7 +325,7 @@ exports.getOrders = async (req, res) => {
 
     res.status(200).json({
       status: true,
-      message: "Orders retrieved successfully",
+      message: "Orders retrieved successfully.........",
       data,
     });
   } catch (err) {
