@@ -49,6 +49,7 @@ router.get('/get_lab_order', auth, get_lab_order);
 router.get('/home', auth, homeController.getHomePageData);
 router.get('/getYoga', auth, homeController.getYoga);
 router.get('/getLabs', auth, homeController.getLabs);
+router.get('/getLabsAdmin', homeController.getLabsAdmin);
 router.get('/getPharmacy', auth, homeController.getPharmacy);
 router.post('/searchByCityAndType', auth, homeController.searchByCityAndType);
 router.get('/getService', auth, homeController.getService);
