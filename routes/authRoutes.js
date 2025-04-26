@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, yoga_order, phys_order, getNotification, sendNotificationByType, update_device_id, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order } = require('../controllers/authController');
+const { login, yoga_order, phys_order, getNotification, sendNotificationByType, update_device_id, get_booked_appoinment, get_lab_order, verifyOtp, otpSend, updatePasswordWithOldPassword, register, register_lab, register_pharmacy, updatePassword, hbot_order, lab_order, hbot_order_Slot } = require('../controllers/authController');
 
 const router = express.Router();
 const multer = require('multer');
