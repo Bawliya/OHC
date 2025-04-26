@@ -297,7 +297,7 @@ exports.getOrders = async (req, res) => {
       {
         $lookup: {
           from: 'labtests',       // collection name in MongoDB
-          localField: 'labId',     // field in orders
+          localField: 'lab_id',     // field in orders
           foreignField: '_id',     // field in labtests
           as: 'labInfo'
         }
