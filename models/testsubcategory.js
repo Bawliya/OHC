@@ -1,8 +1,9 @@
+const { Schema } = require('mongoose');
 const mongoose = require('mongoose');
 
 const testsubCategorySchema = new mongoose.Schema({
   testCategoryId: {
-    type: ObjectId,
+    type: Schema.Types.ObjectId,
   },
   name: {
     type: String,
