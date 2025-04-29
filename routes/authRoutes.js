@@ -11,6 +11,7 @@ const homeController = require('../controllers/homeController');
 const adminController = require('../controllers/admincontroller');
 const chatController = require('../controllers/chatcontroller');
 const yogacontroller = require('../controllers/yogacontroller');
+const test = require('../controllers/test');
 const {
   createVideo,
   getAllVideos,
@@ -107,6 +108,19 @@ router.get("/videoupdate/:id", getVideoById);
 router.delete("/videodelete/:id", deleteVideo);
 
 router.post('/report', upload.single('report'), adminController.uploadReport);
+
+// test
+
+
+router.post('/categoryadd/', upload.single('image'), test.createCategory);
+router.post('/subcategoryadd/', upload.single('image'), test.createSubCategory);
+router.get('/categoryget/', test.getAllCategories);
+router.get('/subcategoryget/', test.getAllSubCategories);
+router.get('/categorygetone/:id', test.getCategoryById);
+router.get('/subcategorygetone/:id', test.getSubCategoryById);
+router.put('/categoryupdate/:id', upload.single('image'), test.updateCategory);
+router.put('/subcategoryupdate/:id', upload.single('image'), test.updateSubCategory);
+
 
 
 module.exports = router; 
