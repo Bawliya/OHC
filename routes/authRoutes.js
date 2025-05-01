@@ -112,14 +112,14 @@ router.post('/report', upload.single('report'), adminController.uploadReport);
 // test
 
 
-router.post('/categoryadd', upload.single('image'), test.createTestCategory);
-router.post('/subcategoryadd/', upload.single('image'), test.createSubCategory);
-router.get('/categoryget/', test.getAllCategories);
-router.get('/subcategoryget/', test.getAllSubCategories);
-router.get('/categorygetone/:id', test.getCategoryById);
-router.get('/subcategorygetone/:id', test.getSubCategoryById);
-router.put('/categoryupdate/:id', upload.single('image'), test.updateCategory);
-router.put('/subcategoryupdate/:id', upload.single('image'), test.updateSubCategory);
+router.post('/testcategoryadd', upload.single('image'), test.createTestCategory);
+router.post('/testsubcategoryadd/', upload.single('image'), test.createSubCategory);
+router.get('/testcategoryget/', test.getAllCategories);
+router.get('/testsubcategoryget/', test.getAllSubCategories);
+router.get('/testcategorygetone/:id', test.getCategoryById);
+router.get('/testsubcategorygetone/:id', test.getSubCategoryById);
+router.put('/testcategoryupdate/:id', upload.single('image'), test.updateCategory);
+router.put('/testsubcategoryupdate/:id', upload.single('image'), test.updateSubCategory);
 
 
 
