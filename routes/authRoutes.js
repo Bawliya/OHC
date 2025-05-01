@@ -112,7 +112,7 @@ router.post('/report', upload.single('report'), adminController.uploadReport);
 // test
 
 
-router.post('/categoryadd/', upload.single('image'), test.createCategory);
+router.post('/categoryadd', upload.single('image'), test.createCategory);
 router.post('/subcategoryadd/', upload.single('image'), test.createSubCategory);
 router.get('/categoryget/', test.getAllCategories);
 router.get('/subcategoryget/', test.getAllSubCategories);
