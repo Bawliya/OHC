@@ -1,4 +1,4 @@
-const Category = require('../models/testcategory');
+const testCategory = require('../models/testcategory');
 const subCategory = require('../models/testsubcategory');
 
 // Create a new category
@@ -14,7 +14,7 @@ exports.createCategory = async (req, res) => {
       });
     }
 
-    const category = new Category({ name, image: imagePath });
+    const category = new testCategory({ name, image: imagePath });
     await category.save();
 
     res.status(201).json({
@@ -43,7 +43,7 @@ exports.createSubCategory = async (req, res) => {
       });
     }
 
-    const category = new Category({ name,price,testCategoryId,image: imagePath });
+    const category = new testCategory({ name,price,testCategoryId,image: imagePath });
     await category.save();
 
     res.status(201).json({
@@ -63,7 +63,7 @@ exports.createSubCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await testCategory.find();
     res.status(200).json({
       status: true,
       message: 'Categories fetched successfully',
@@ -99,7 +99,7 @@ exports.getAllSubCategories = async (req, res) => {
 
 exports.getCategoryById = async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    const category = await testCategory.findById(req.params.id);
 
     if (!category) {
       return res.status(404).json({
@@ -155,7 +155,7 @@ exports.updateCategory = async (req, res) => {
 
     if (req.file) updates.image = req.file.filename;
 
-    const category = await Category.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const category = await testCategory.findByIdAndUpdate(req.params.id, updates, { new: true });
 
     if (!category) {
       return res.status(404).json({
