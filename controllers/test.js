@@ -2,7 +2,7 @@ const testCategory = require('../models/testcategory');
 const subCategory = require('../models/testsubcategory');
 
 // Create a new category
-exports.createCategory = async (req, res) => {
+exports.createTestCategory = async (req, res) => {
   try {
     const { name } = req.body;
     const imagePath = req.file ? req.file.filename : null;
