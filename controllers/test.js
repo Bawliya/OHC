@@ -43,7 +43,7 @@ exports.createSubCategory = async (req, res) => {
       });
     }
 
-    const category = new testCategory({ name,price,testCategoryId,image: imagePath });
+    const category = new subCategory({ name,price,testCategoryId,image: imagePath });
     await category.save();
 
     res.status(201).json({
