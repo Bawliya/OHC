@@ -11,7 +11,7 @@ const app = express();
 
 // Apply CORS middleware before routes
 app.use(cors({
-  origin: '*',
+  origin: ['http://localhost:5173','https://admin.ohcapp.online'], // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true, // Allow credentials (cookies, authorization headers)
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
