@@ -121,6 +121,9 @@ router.get('/testsubcategorygetone/:id', test.getSubCategoryById);
 router.put('/testcategoryupdate/:id', upload.single('image'), test.updateCategory);
 router.put('/testsubcategoryupdate/:id', upload.single('image'), test.updateSubCategory);
 
+router.get('/categorieslisting', test.getAllCategoriesForApp);
+router.post('/subcategorieslisting', test.getAllSubCategoriesForApp);
+
 
 
 module.exports = router; 

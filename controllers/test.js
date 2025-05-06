@@ -78,6 +78,47 @@ exports.getAllCategories = async (req, res) => {
   }
 };
 
+exports.getAllCategoriesForApp = async (req, res) => {
+  try {
+    const categories = await testCategory.find({}, { name: 1,image:1 });
+    res.status(200).json({
+      status: true,
+      message: 'Categories fetched successfully',
+      data: categories,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to fetch categories',
+      error: err.message,
+    });
+  }
+};
+
+
+exports.getAllSubCategoriesForApp = async (req, res) => {
+  try {
+    const {categoryId} = req.body
+    if (!categoryId) {
+      return res.status(400).json({
+        status: false,
+        message: 'categoryId is required',
+      });
+    }
+    const categories = await subCategory.find({testCategoryId:categoryId},{ name: 1,image:1,price:1 });
+    res.status(200).json({
+      status: true,
+      message: 'Categories fetched successfully',
+      data: categories,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: 'Failed to fetch categories',
+      error: err.message,
+    });
+  }
+};
 
 exports.getAllSubCategories = async (req, res) => {
   try {
