@@ -805,15 +805,15 @@ exports.lab_order = async (req, res) => {
     // Fetch the lab's player ID (device_id) from the User table
     const labUser = await User.findById({ _id: lab_id });
 
-    if (!labUser || !labUser.device_id) {
+    if (!labUser) {
       return res.status(404).json({
-        message: "Lab user not found or device_id missing",
+        message: "Lab user not found.",
         status: false,
       });
     }
 
-    const playerId = labUser.device_id; // Player ID for the lab's device
-    console.log([playerId]);
+    if(labUser.device_id){
+    const playerId = labUser.device_id;
     const notificationMessage = `New Lab Appointment: ${fullname} has booked an appointment.`;
     const notificationTitle = "Lab Appointment Notification";
     const notificationData = lab_order;
@@ -833,6 +833,7 @@ exports.lab_order = async (req, res) => {
       type: "lab_order",
     });
     await noti.save();
+  }
 
     return res.status(200).json({
       message: "Lab Appointment Submit successfull",
